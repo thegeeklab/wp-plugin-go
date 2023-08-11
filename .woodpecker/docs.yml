@@ -15,7 +15,7 @@ steps:
     image: quay.io/thegeeklab/alpine-tools
     commands:
       - spellchecker --files 'README.md' 'CONTRIBUTING.md' -d .dictionary -p spell indefinite-article syntax-urls
-      - $(pwd)
+      - echo $(pwd)
       - ls -l .
       - cat .dictionary
     environment:

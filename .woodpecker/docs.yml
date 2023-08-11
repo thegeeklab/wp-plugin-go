@@ -5,10 +5,6 @@ when:
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
 
-clone:
-  git:
-    image: xoxys/plugin-git:devel
-
 steps:
   markdownlint:
     image: quay.io/thegeeklab/markdownlint-cli
@@ -18,8 +14,7 @@ steps:
   spellcheck:
     image: quay.io/thegeeklab/alpine-tools
     commands:
-      - cat .dictionary
-      - spellchecker --files 'README.md' 'CONTRIBUTING.md' -d .dictionary -p spell indefinite-article syntax-urls
+      - spellchecker --files 'README.md' 'CONTRIBUTING.md' -d .dictionary -p spell indefinite-article syntax-urls --no-suggestions
     environment:
       FORCE_COLOR: "true"
       NPM_CONFIG_LOGLEVEL: "error"

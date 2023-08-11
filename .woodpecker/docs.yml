@@ -14,10 +14,8 @@ steps:
   spellcheck:
     image: quay.io/thegeeklab/alpine-tools
     commands:
-      - spellchecker --files 'README.md' 'CONTRIBUTING.md' -d .dictionary -p spell indefinite-article syntax-urls
-      - echo $(pwd)
-      - ls -l .
       - cat .dictionary
+      - spellchecker --files 'README.md' 'CONTRIBUTING.md' -d .dictionary -p spell indefinite-article syntax-urls
     environment:
       FORCE_COLOR: "true"
       NPM_CONFIG_LOGLEVEL: "error"

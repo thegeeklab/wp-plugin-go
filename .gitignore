@@ -1,6 +1,6 @@
 /dist/
 /release/
-/drone-plugin-lib*
+/wp-plugin-go*
 
 coverage.out
 CHANGELOG.md

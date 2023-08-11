@@ -2,7 +2,7 @@ style: github
 template: CHANGELOG.tpl.md
 info:
   title: CHANGELOG
-  repository_url: https://github.com/thegeeklab/drone-plugin-lib
+  repository_url: https://github.com/thegeeklab/wp-plugin-go
 options:
   commit_groups:
     title_maps:

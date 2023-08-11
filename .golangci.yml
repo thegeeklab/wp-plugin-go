@@ -95,3 +95,7 @@ linters-settings:
   gofumpt:
     extra-rules: true
     lang-version: "1.20"
+  tagliatelle:
+    case:
+      rules:
+        json: snake

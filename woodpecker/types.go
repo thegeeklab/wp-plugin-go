@@ -1,4 +1,4 @@
-package drone
+package plugin
 
 import (
 	"strings"

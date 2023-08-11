@@ -1,7 +1,7 @@
 repository:
-  name: drone-plugin-lib
-  description: Helper library for writing Drone CI plugins
-  topics: drone, drone-plugin
+  name: wp-plugin-go
+  description: Helper library for writing Woodpecker CI plugins
+  topics: woodpecker, wp-plugin
 
   private: false
   has_issues: true
@@ -50,7 +50,9 @@ branches:
       required_status_checks:
         strict: false
         contexts:
-          - continuous-integration/drone/pr
+          - ci/woodpecker/pr/test
+          - ci/woodpecker/pr/release
+          - ci/woodpecker/pr/container
       enforce_admins: true
       required_linear_history: true
       restrictions: null

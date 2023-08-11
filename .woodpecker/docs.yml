@@ -18,7 +18,3 @@ steps:
     environment:
       FORCE_COLOR: "true"
       NPM_CONFIG_LOGLEVEL: "error"
-
-depends_on:
-  - test
-  - release

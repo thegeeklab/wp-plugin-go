@@ -28,4 +28,5 @@ steps:
 
 depends_on:
   - test
+  - docs
   - release

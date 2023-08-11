@@ -1,0 +1,20 @@
+---
+when:
+  - event: [pull_request, tag]
+  - event: [push, manual]
+    branch:
+      - ${CI_REPO_DEFAULT_BRANCH}
+
+steps:
+  markdownlint:
+    image: quay.io/thegeeklab/markdownlint-cli
+    commands:
+      - markdownlint 'README.md' 'CONTRIBUTING.md'
+
+  spellcheck:
+    image: quay.io/thegeeklab/alpine-tools
+    commands:
+      - spellchecker --files 'README.md' 'CONTRIBUTING.md' -d .dictionary -p spell indefinite-article syntax-urls --no-suggestions
+    environment:
+      FORCE_COLOR: "true"
+      NPM_CONFIG_LOGLEVEL: "error"

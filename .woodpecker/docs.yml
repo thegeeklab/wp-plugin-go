@@ -5,6 +5,10 @@ when:
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
 
+clone:
+  git:
+    image: xoxys/plugin-git:devel
+
 steps:
   markdownlint:
     image: quay.io/thegeeklab/markdownlint-cli

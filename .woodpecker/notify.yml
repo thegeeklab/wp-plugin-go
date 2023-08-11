@@ -27,5 +27,4 @@ steps:
       - status: [success, failure]
 
 depends_on:
-  - test
-  - release
+  - docs

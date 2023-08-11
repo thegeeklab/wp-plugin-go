@@ -6,11 +6,6 @@ when:
       - ${CI_REPO_DEFAULT_BRANCH}
 
 steps:
-  checksum:
-    image: docker.io/alpine
-    commands:
-      - sha256sum retry > sha256sum.txt
-
   changelog-generate:
     image: quay.io/thegeeklab/git-chglog
     commands:
@@ -28,9 +23,6 @@ steps:
     settings:
       api_key:
         from_secret: github_token
-      files:
-        - retry
-        - sha256sum.txt
       note: CHANGELOG.md
       overwrite: true
       title: ${CI_COMMIT_TAG}

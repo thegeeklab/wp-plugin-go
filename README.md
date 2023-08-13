@@ -13,13 +13,13 @@ Helper library to reduce the boilerplate code for writing Woodpecker CI plugins.
 ### Download the package
 
 ```Shell
-go get -d github.com/thegeeklab/wp-plugin-go/woodpecker
+go get -d github.com/thegeeklab/wp-plugin-go
 ```
 
 ### Import the package
 
 ```Go
-import "github.com/thegeeklab/wp-plugin-go/woodpecker"
+import "github.com/thegeeklab/wp-plugin-go"
 ```
 
 ## Contributors

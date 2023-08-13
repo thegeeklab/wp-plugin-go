@@ -16,8 +16,10 @@ package plugin
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
@@ -32,6 +34,8 @@ type Options struct {
 	Description string
 	// Version of the plugin.
 	Version string
+	// Version metadata of the plugin.
+	VersionMetadata string
 	// Flags of the plugin.
 	Flags []cli.Flag
 	// Execute function of the plugin.
@@ -48,7 +52,7 @@ type Plugin struct {
 }
 
 // ExecuteFunc defines the function that is executed by the plugin.
-type ExecuteFunc func(ctx context.Context) error
+type ExecuteFunc func(ctx context.Context, cCtx *cli.Context) error
 
 // New plugin instance.
 func New(opt Options) *Plugin {
@@ -61,6 +65,11 @@ func New(opt Options) *Plugin {
 		Description: opt.Description,
 		Version:     opt.Version,
 		Flags:       append(opt.Flags, Flags()...),
+	}
+
+	cli.VersionPrinter = func(c *cli.Context) {
+		version := fmt.Sprintf("%s version=%s %s\n", c.App.Name, c.App.Version, opt.VersionMetadata)
+		fmt.Print(strings.TrimSpace(version))
 	}
 
 	plugin := &Plugin{
@@ -84,7 +93,7 @@ func (p *Plugin) action(ctx *cli.Context) error {
 		panic("plugin execute function is not set")
 	}
 
-	return p.execute(ctx.Context)
+	return p.execute(ctx.Context, ctx)
 }
 
 // HTTPClient returns the http.Client instance.

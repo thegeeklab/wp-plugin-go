@@ -1,4 +1,4 @@
-module github.com/thegeeklab/wp-plugin-go/woodpecker
+module github.com/thegeeklab/wp-plugin-go
 
 go 1.20
 

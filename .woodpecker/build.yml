@@ -31,4 +31,3 @@ steps:
 
 depends_on:
   - test
-  - docs

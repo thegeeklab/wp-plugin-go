@@ -1,7 +1,7 @@
 repository:
   name: wp-plugin-go
   description: Helper library for writing Woodpecker CI plugins
-  topics: woodpecker-ci, woodpecker, woodpecker-plugin,
+  topics: woodpecker-ci, woodpecker, woodpecker-plugin
 
   private: false
   has_issues: true

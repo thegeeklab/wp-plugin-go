@@ -44,7 +44,7 @@ func systemFlags(category string) []cli.Flag {
 		&cli.StringFlag{
 			Name:     "system.link",
 			Usage:    "system link",
-			EnvVars:  []string{"CI_SYSTEM_LINK"},
+			EnvVars:  []string{"CI_SYSTEM_URL"},
 			Category: category,
 		},
 		&cli.StringFlag{

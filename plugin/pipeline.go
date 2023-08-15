@@ -56,7 +56,7 @@ func pipelineFlags(category string) []cli.Flag {
 		&cli.StringFlag{
 			Name:     "pipeline.link",
 			Usage:    "pipeline link",
-			EnvVars:  []string{"CI_PIPELINE_LINK"},
+			EnvVars:  []string{"CI_PIPELINE_URL"},
 			Category: category,
 		},
 		&cli.StringFlag{

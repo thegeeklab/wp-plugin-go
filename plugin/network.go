@@ -34,7 +34,23 @@ const (
 	HTTPTransportMaxIdleConns        = 100
 )
 
-func httpClientFlags(category string) []cli.Flag {
+// Network contains options for connecting to the network.
+type Network struct {
+	// Context for making network requests.
+	//
+	// If `trace` logging is requested the context will use `httptrace` to
+	// capture all network requests.
+	//nolint:containedctx
+	Context context.Context
+
+	/// Whether SSL verification is skipped
+	SkipVerify bool
+
+	// Client for making network requests.
+	Client *http.Client
+}
+
+func networkFlags(category string) []cli.Flag {
 	return []cli.Flag{
 		&cli.BoolFlag{
 			Name:     "transport.skip-verify",
@@ -57,11 +73,12 @@ func httpClientFlags(category string) []cli.Flag {
 	}
 }
 
-func HTTPClientFromContext(ctx *cli.Context) *http.Client {
+func NetworkFromContext(ctx *cli.Context) Network {
 	var (
-		skip     = ctx.Bool("transport.skip-verify")
-		socks    = ctx.String("transport.socks-proxy")
-		socksoff = ctx.Bool("transport.socks-proxy-off")
+		skip           = ctx.Bool("transport.skip-verify")
+		defaultContext = context.Background()
+		socks          = ctx.String("transport.socks-proxy")
+		socksoff       = ctx.Bool("transport.socks-proxy-off")
 	)
 
 	certs, err := x509.SystemCertPool()
@@ -106,7 +123,13 @@ func HTTPClientFromContext(ctx *cli.Context) *http.Client {
 		transport.DialContext = dialer.DialContext
 	}
 
-	return &http.Client{
+	client := &http.Client{
 		Transport: transport,
+	}
+
+	return Network{
+		Context:    defaultContext,
+		SkipVerify: skip,
+		Client:     client,
 	}
 }

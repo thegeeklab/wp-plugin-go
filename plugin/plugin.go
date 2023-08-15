@@ -61,10 +61,10 @@ func New(opt Options) *Plugin {
 	}
 
 	app := &cli.App{
-		Name:        opt.Name,
-		Description: opt.Description,
-		Version:     opt.Version,
-		Flags:       append(opt.Flags, Flags()...),
+		Name:    opt.Name,
+		Usage:   opt.Description,
+		Version: opt.Version,
+		Flags:   append(opt.Flags, Flags()...),
 	}
 
 	cli.VersionPrinter = func(c *cli.Context) {

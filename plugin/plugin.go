@@ -17,7 +17,6 @@ package plugin
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"os"
 	"strings"
 
@@ -46,7 +45,8 @@ type Options struct {
 type Plugin struct {
 	app     *cli.App
 	execute ExecuteFunc
-	client  *http.Client
+	// Network options.
+	Network Network
 	// Metadata of the current pipeline.
 	Metadata Metadata
 }
@@ -87,18 +87,13 @@ func (p *Plugin) action(ctx *cli.Context) error {
 	}
 
 	p.Metadata = MetadataFromContext(ctx)
-	p.client = HTTPClientFromContext(ctx)
+	p.Network = NetworkFromContext(ctx)
 
 	if p.execute == nil {
 		panic("plugin execute function is not set")
 	}
 
 	return p.execute(ctx.Context, ctx)
-}
-
-// HTTPClient returns the http.Client instance.
-func (p *Plugin) HTTPClient() *http.Client {
-	return p.client
 }
 
 // Run the plugin.

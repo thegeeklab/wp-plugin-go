@@ -95,7 +95,7 @@ func (p *Plugin) action(ctx *cli.Context) error {
 		url, err := url.JoinPath(
 			p.Metadata.System.URL,
 			"repos",
-			strconv.FormatInt(p.Metadata.Repository.RemoteID, 10),
+			p.Metadata.Repository.Slug,
 			"pipeline",
 			strconv.FormatInt(p.Metadata.Pipeline.Number, 10),
 		)

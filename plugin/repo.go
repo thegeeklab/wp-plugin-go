@@ -20,6 +20,7 @@ import (
 
 // Repository defines runtime metadata for a repository.
 type Repository struct {
+	Slug     string `json:"slug,omitempty"`
 	Name     string `json:"name,omitempty"`
 	Owner    string `json:"owner,omitempty"`
 	Link     string `json:"link,omitempty"`
@@ -30,6 +31,12 @@ type Repository struct {
 
 func repositoryFlags(category string) []cli.Flag {
 	return []cli.Flag{
+		&cli.StringFlag{
+			Name:     "repo.slug",
+			Usage:    "repo slug",
+			EnvVars:  []string{"CI_REPO"},
+			Category: category,
+		},
 		&cli.StringFlag{
 			Name:     "repo.name",
 			Usage:    "repo name",
@@ -45,7 +52,7 @@ func repositoryFlags(category string) []cli.Flag {
 		&cli.StringFlag{
 			Name:     "repo.link",
 			Usage:    "repo link",
-			EnvVars:  []string{"CI_REPO_LINK"},
+			EnvVars:  []string{"CI_REPO_URL"},
 			Category: category,
 		},
 		&cli.StringFlag{
@@ -71,6 +78,7 @@ func repositoryFlags(category string) []cli.Flag {
 
 func repositoryFromContext(c *cli.Context) Repository {
 	return Repository{
+		Slug:     c.String("repo.slug"),
 		Name:     c.String("repo.name"),
 		Owner:    c.String("repo.owner"),
 		Link:     c.String("repo.link"),

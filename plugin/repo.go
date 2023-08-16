@@ -20,13 +20,14 @@ import (
 
 // Repository defines runtime metadata for a repository.
 type Repository struct {
-	Slug     string `json:"slug,omitempty"`
-	Name     string `json:"name,omitempty"`
-	Owner    string `json:"owner,omitempty"`
-	Link     string `json:"link,omitempty"`
-	CloneURL string `json:"clone_url,omitempty"`
-	Private  bool   `json:"private,omitempty"`
-	Branch   string `json:"default_branch,omitempty"`
+	Slug     string
+	Name     string
+	Owner    string
+	URL      string
+	CloneURL string
+	Private  bool
+	Branch   string
+	RemoteID int64
 }
 
 func repositoryFlags(category string) []cli.Flag {
@@ -50,8 +51,8 @@ func repositoryFlags(category string) []cli.Flag {
 			Category: category,
 		},
 		&cli.StringFlag{
-			Name:     "repo.link",
-			Usage:    "repo link",
+			Name:     "repo.url",
+			Usage:    "repo url",
 			EnvVars:  []string{"CI_REPO_URL"},
 			Category: category,
 		},
@@ -73,6 +74,12 @@ func repositoryFlags(category string) []cli.Flag {
 			EnvVars:  []string{"CI_REPO_DEFAULT_BRANCH"},
 			Category: category,
 		},
+		&cli.Int64Flag{
+			Name:     "repo.remote-id",
+			Usage:    "repo remote id",
+			EnvVars:  []string{"CI_REPO_REMOTE_ID"},
+			Category: category,
+		},
 	}
 }
 
@@ -81,9 +88,10 @@ func repositoryFromContext(c *cli.Context) Repository {
 		Slug:     c.String("repo.slug"),
 		Name:     c.String("repo.name"),
 		Owner:    c.String("repo.owner"),
-		Link:     c.String("repo.link"),
+		URL:      c.String("repo.url"),
 		CloneURL: c.String("repo.clone-url"),
 		Private:  c.Bool("repo.private"),
 		Branch:   c.String("repo.default-branch"),
+		RemoteID: c.Int64("repo.remote-id"),
 	}
 }

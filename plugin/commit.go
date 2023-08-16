@@ -22,7 +22,7 @@ type (
 	// Commit defines runtime metadata for a commit.
 	Commit struct {
 		URL          string
-		Sha          string
+		SHA          string
 		Ref          string
 		Refspec      string
 		PullRequest  string
@@ -128,7 +128,7 @@ func currFlags(category string) []cli.Flag {
 func currFromContext(c *cli.Context) Commit {
 	return Commit{
 		URL:          c.String("commit.url"),
-		Sha:          c.String("commit.sha"),
+		SHA:          c.String("commit.sha"),
 		Ref:          c.String("commit.ref"),
 		Refspec:      c.String("commit.refspec"),
 		PullRequest:  c.String("commit.pull-request"),
@@ -207,7 +207,7 @@ func prevFlags(category string) []cli.Flag {
 func prevFromContext(c *cli.Context) Commit {
 	return Commit{
 		URL:     c.String("prev.commit.url"),
-		Sha:     c.String("prev.commit.sha"),
+		SHA:     c.String("prev.commit.sha"),
 		Ref:     c.String("prev.commit.ref"),
 		Refspec: c.String("prev.commit.refspec"),
 		Branch:  c.String("prev.commit.branch"),

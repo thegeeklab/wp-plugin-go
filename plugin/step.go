@@ -22,9 +22,9 @@ import (
 
 // Step defines runtime metadata for a step.
 type Step struct {
-	Number   int       `json:"number,omitempty"`
-	Started  time.Time `json:"started,omitempty"`
-	Finished time.Time `json:"finished,omitempty"`
+	Number   int
+	Started  time.Time
+	Finished time.Time
 }
 
 func stepFlags(category string) []cli.Flag {

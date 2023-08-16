@@ -20,11 +20,11 @@ import (
 
 // System defines runtime metadata for a ci/cd system.
 type System struct {
-	Name     string `json:"name,omitempty"`
-	Host     string `json:"host,omitempty"`
-	Link     string `json:"link,omitempty"`
-	Platform string `json:"arch,omitempty"`
-	Version  string `json:"version,omitempty"`
+	Name     string
+	Host     string
+	URL      string
+	Platform string
+	Version  string
 }
 
 func systemFlags(category string) []cli.Flag {
@@ -42,8 +42,8 @@ func systemFlags(category string) []cli.Flag {
 			Category: category,
 		},
 		&cli.StringFlag{
-			Name:     "system.link",
-			Usage:    "system link",
+			Name:     "system.url",
+			Usage:    "system url",
 			EnvVars:  []string{"CI_SYSTEM_URL"},
 			Category: category,
 		},
@@ -63,13 +63,10 @@ func systemFlags(category string) []cli.Flag {
 }
 
 func systemFromContext(ctx *cli.Context) System {
-	link := ctx.String("system.link")
-	host := ctx.String("system.host")
-
 	return System{
 		Name:     ctx.String("system.name"),
-		Host:     host,
-		Link:     link,
+		Host:     ctx.String("system.host"),
+		URL:      ctx.String("system.url"),
 		Platform: ctx.String("system.arch"),
 		Version:  ctx.String("system.version"),
 	}

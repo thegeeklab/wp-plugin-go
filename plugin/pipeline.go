@@ -22,15 +22,15 @@ import (
 
 // Pipeline defines runtime metadata for a pipeline.
 type Pipeline struct {
-	Number       int64     `json:"number,omitempty"`
-	Status       string    `json:"status,omitempty"`
-	Event        string    `json:"event,omitempty"`
-	Link         string    `json:"link,omitempty"`
-	DeployTarget string    `json:"target,omitempty"`
-	Created      time.Time `json:"created,omitempty"`
-	Started      time.Time `json:"started,omitempty"`
-	Finished     time.Time `json:"finished,omitempty"`
-	Parent       int64     `json:"parent,omitempty"`
+	Number       int64
+	Status       string
+	Event        string
+	URL          string
+	DeployTarget string
+	Created      time.Time
+	Started      time.Time
+	Finished     time.Time
+	Parent       int64
 }
 
 func pipelineFlags(category string) []cli.Flag {
@@ -54,9 +54,10 @@ func pipelineFlags(category string) []cli.Flag {
 			Category: category,
 		},
 		&cli.StringFlag{
-			Name:     "pipeline.link",
-			Usage:    "pipeline link",
-			EnvVars:  []string{"CI_PIPELINE_URL"},
+			Name:  "pipeline.url",
+			Usage: "pipeline url",
+			// TODO: Revert after https://github.com/woodpecker-ci/woodpecker/issues/2219
+			// EnvVars:  []string{"CI_PIPELINE_URL"},
 			Category: category,
 		},
 		&cli.StringFlag{
@@ -97,7 +98,7 @@ func pipelineFromContext(c *cli.Context) Pipeline {
 		Number:       c.Int64("pipeline.number"),
 		Status:       c.String("pipeline.status"),
 		Event:        c.String("pipeline.event"),
-		Link:         c.String("pipeline.link"),
+		URL:          c.String("pipeline.url"),
 		DeployTarget: c.String("pipeline.deploy-target"),
 		Created:      time.Unix(c.Int64("pipeline.created"), 0),
 		Started:      time.Unix(c.Int64("pipeline.started"), 0),

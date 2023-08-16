@@ -20,12 +20,12 @@ import (
 
 // Metadata defines runtime metadata.
 type Metadata struct {
-	Repository Repository `json:"repo,omitempty"`
-	Pipeline   Pipeline   `json:"curr,omitempty"`
-	Curr       Commit     `json:"commit,omitempty"`
-	Prev       Commit     `json:"prev,omitempty"`
-	Step       Step       `json:"step,omitempty"`
-	System     System     `json:"sys,omitempty"`
+	Repository Repository
+	Pipeline   Pipeline
+	Curr       Commit
+	Prev       Commit
+	Step       Step
+	System     System
 }
 
 // MetadataFromContext creates a Metadata from the cli.Context.

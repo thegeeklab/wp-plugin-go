@@ -17,7 +17,9 @@ package plugin
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -88,6 +90,19 @@ func (p *Plugin) action(ctx *cli.Context) error {
 
 	p.Metadata = MetadataFromContext(ctx)
 	p.Network = NetworkFromContext(ctx)
+
+	if p.Metadata.Pipeline.URL == "" {
+		url, err := url.JoinPath(
+			p.Metadata.System.URL,
+			"repos",
+			strconv.FormatInt(p.Metadata.Repository.RemoteID, 10),
+			"pipeline",
+			strconv.FormatInt(p.Metadata.Pipeline.Number, 10),
+		)
+		if err == nil {
+			p.Metadata.Pipeline.URL = url
+		}
+	}
 
 	if p.execute == nil {
 		panic("plugin execute function is not set")

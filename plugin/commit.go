@@ -21,28 +21,35 @@ import (
 type (
 	// Commit defines runtime metadata for a commit.
 	Commit struct {
-		Sha          string `json:"sha,omitempty"`
-		Ref          string `json:"ref,omitempty"`
-		Refspec      string `json:"refspec,omitempty"`
-		PullRequest  string `json:"pull_request,omitempty"`
-		SourceBranch string `json:"source_branch,omitempty"`
-		TargetBranch string `json:"target_branch,omitempty"`
-		Branch       string `json:"branch,omitempty"`
-		Tag          string `json:"tag,omitempty"`
-		Message      string `json:"message,omitempty"`
-		Author       Author `json:"author,omitempty"`
+		URL          string
+		Sha          string
+		Ref          string
+		Refspec      string
+		PullRequest  string
+		SourceBranch string
+		TargetBranch string
+		Branch       string
+		Tag          string
+		Message      string
+		Author       Author
 	}
 
 	// Author defines runtime metadata for a commit author.
 	Author struct {
-		Name   string `json:"name,omitempty"`
-		Email  string `json:"email,omitempty"`
-		Avatar string `json:"avatar,omitempty"`
+		Name   string
+		Email  string
+		Avatar string
 	}
 )
 
 func currFlags(category string) []cli.Flag {
 	return []cli.Flag{
+		&cli.StringFlag{
+			Name:     "commit.url",
+			Usage:    "commit URL",
+			EnvVars:  []string{"CI_COMMIT_URL"},
+			Category: category,
+		},
 		&cli.StringFlag{
 			Name:     "commit.sha",
 			Usage:    "commit SHA",
@@ -120,6 +127,7 @@ func currFlags(category string) []cli.Flag {
 
 func currFromContext(c *cli.Context) Commit {
 	return Commit{
+		URL:          c.String("commit.url"),
 		Sha:          c.String("commit.sha"),
 		Ref:          c.String("commit.ref"),
 		Refspec:      c.String("commit.refspec"),
@@ -139,6 +147,12 @@ func currFromContext(c *cli.Context) Commit {
 
 func prevFlags(category string) []cli.Flag {
 	return []cli.Flag{
+		&cli.StringFlag{
+			Name:     "prev.commit.url",
+			Usage:    "previous commit URL",
+			EnvVars:  []string{"CI_PREV_COMMIT_URL"},
+			Category: category,
+		},
 		&cli.StringFlag{
 			Name:     "prev.commit.sha",
 			Usage:    "previous commit SHA",
@@ -192,6 +206,7 @@ func prevFlags(category string) []cli.Flag {
 
 func prevFromContext(c *cli.Context) Commit {
 	return Commit{
+		URL:     c.String("prev.commit.url"),
 		Sha:     c.String("prev.commit.sha"),
 		Ref:     c.String("prev.commit.ref"),
 		Refspec: c.String("prev.commit.refspec"),

@@ -25,7 +25,7 @@ type (
 		SHA          string
 		Ref          string
 		Refspec      string
-		PullRequest  string
+		PullRequest  int
 		SourceBranch string
 		TargetBranch string
 		Branch       string
@@ -68,7 +68,7 @@ func currFlags(category string) []cli.Flag {
 			EnvVars:  []string{"CI_COMMIT_REFSPEC"},
 			Category: category,
 		},
-		&cli.StringFlag{
+		&cli.IntFlag{
 			Name:     "commit.pull-request",
 			Usage:    "commit pull request",
 			EnvVars:  []string{"CI_COMMIT_PULL_REQUEST"},
@@ -131,7 +131,7 @@ func currFromContext(c *cli.Context) Commit {
 		SHA:          c.String("commit.sha"),
 		Ref:          c.String("commit.ref"),
 		Refspec:      c.String("commit.refspec"),
-		PullRequest:  c.String("commit.pull-request"),
+		PullRequest:  c.Int("commit.pull-request"),
 		SourceBranch: c.String("commit.source-branch"),
 		TargetBranch: c.String("commit.target-branch"),
 		Branch:       c.String("commit.branch"),

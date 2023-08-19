@@ -112,8 +112,12 @@ func (p *Plugin) action(ctx *cli.Context) error {
 }
 
 // Run the plugin.
-func (p *Plugin) Run() {
-	if err := p.app.Run(os.Args); err != nil {
+func (p *Plugin) Run(args []string) {
+	if args == nil {
+		args = os.Args
+	}
+
+	if err := p.app.Run(args); err != nil {
 		log.Error().Err(err).Msg("execution failed")
 		os.Exit(1)
 	}

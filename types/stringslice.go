@@ -1,8 +1,6 @@
-package plugin
+package types
 
-import (
-	"strings"
-)
+import "strings"
 
 // StringSliceFlag is a flag type which support comma separated values and escaping to not split at unwanted lines.
 type StringSliceFlag struct {

@@ -45,7 +45,7 @@ type Options struct {
 
 // Plugin defines the plugin instance.
 type Plugin struct {
-	app     *cli.App
+	App     *cli.App
 	execute ExecuteFunc
 	// Network options.
 	Network Network
@@ -75,10 +75,10 @@ func New(opt Options) *Plugin {
 	}
 
 	plugin := &Plugin{
-		app:     app,
+		App:     app,
 		execute: opt.Execute,
 	}
-	plugin.app.Action = plugin.action
+	plugin.App.Action = plugin.action
 
 	return plugin
 }
@@ -112,12 +112,8 @@ func (p *Plugin) action(ctx *cli.Context) error {
 }
 
 // Run the plugin.
-func (p *Plugin) Run(args []string) {
-	if args == nil {
-		args = os.Args
-	}
-
-	if err := p.app.Run(args); err != nil {
+func (p *Plugin) Run() {
+	if err := p.App.Run(os.Args); err != nil {
 		log.Error().Err(err).Msg("execution failed")
 		os.Exit(1)
 	}

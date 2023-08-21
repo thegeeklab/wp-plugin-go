@@ -45,8 +45,9 @@ type Options struct {
 
 // Plugin defines the plugin instance.
 type Plugin struct {
-	app     *cli.App
+	App     *cli.App
 	execute ExecuteFunc
+	Context *cli.Context
 	// Network options.
 	Network Network
 	// Metadata of the current pipeline.
@@ -54,7 +55,7 @@ type Plugin struct {
 }
 
 // ExecuteFunc defines the function that is executed by the plugin.
-type ExecuteFunc func(ctx context.Context, cCtx *cli.Context) error
+type ExecuteFunc func(ctx context.Context) error
 
 // New plugin instance.
 func New(opt Options) *Plugin {
@@ -75,10 +76,10 @@ func New(opt Options) *Plugin {
 	}
 
 	plugin := &Plugin{
-		app:     app,
+		App:     app,
 		execute: opt.Execute,
 	}
-	plugin.app.Action = plugin.action
+	plugin.App.Action = plugin.action
 
 	return plugin
 }
@@ -90,6 +91,7 @@ func (p *Plugin) action(ctx *cli.Context) error {
 
 	p.Metadata = MetadataFromContext(ctx)
 	p.Network = NetworkFromContext(ctx)
+	p.Context = ctx
 
 	if p.Metadata.Pipeline.URL == "" {
 		url, err := url.JoinPath(
@@ -108,12 +110,12 @@ func (p *Plugin) action(ctx *cli.Context) error {
 		panic("plugin execute function is not set")
 	}
 
-	return p.execute(ctx.Context, ctx)
+	return p.execute(ctx.Context)
 }
 
 // Run the plugin.
 func (p *Plugin) Run() {
-	if err := p.app.Run(os.Args); err != nil {
+	if err := p.App.Run(os.Args); err != nil {
 		log.Error().Err(err).Msg("execution failed")
 		os.Exit(1)
 	}

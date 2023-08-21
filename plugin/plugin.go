@@ -47,6 +47,7 @@ type Options struct {
 type Plugin struct {
 	App     *cli.App
 	execute ExecuteFunc
+	Context *cli.Context
 	// Network options.
 	Network Network
 	// Metadata of the current pipeline.
@@ -54,7 +55,7 @@ type Plugin struct {
 }
 
 // ExecuteFunc defines the function that is executed by the plugin.
-type ExecuteFunc func(ctx context.Context, cCtx *cli.Context) error
+type ExecuteFunc func(ctx context.Context) error
 
 // New plugin instance.
 func New(opt Options) *Plugin {
@@ -90,6 +91,7 @@ func (p *Plugin) action(ctx *cli.Context) error {
 
 	p.Metadata = MetadataFromContext(ctx)
 	p.Network = NetworkFromContext(ctx)
+	p.Context = ctx
 
 	if p.Metadata.Pipeline.URL == "" {
 		url, err := url.JoinPath(
@@ -108,7 +110,7 @@ func (p *Plugin) action(ctx *cli.Context) error {
 		panic("plugin execute function is not set")
 	}
 
-	return p.execute(ctx.Context, ctx)
+	return p.execute(ctx.Context)
 }
 
 // Run the plugin.

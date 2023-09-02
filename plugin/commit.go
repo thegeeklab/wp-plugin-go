@@ -15,6 +15,8 @@
 package plugin
 
 import (
+	"strings"
+
 	"github.com/urfave/cli/v2"
 )
 
@@ -31,6 +33,8 @@ type (
 		Branch       string
 		Tag          string
 		Message      string
+		Title        string
+		Description  string
 		Author       Author
 	}
 
@@ -137,6 +141,8 @@ func currFromContext(c *cli.Context) Commit {
 		Branch:       c.String("commit.branch"),
 		Tag:          c.String("commit.tag"),
 		Message:      c.String("commit.message"),
+		Title:        strings.Split(c.String("commit.message"), "\n")[0],
+		Description:  strings.Split(c.String("commit.message"), "\n")[1],
 		Author: Author{
 			Name:   c.String("commit.author.name"),
 			Email:  c.String("commit.author.email"),
@@ -206,12 +212,14 @@ func prevFlags(category string) []cli.Flag {
 
 func prevFromContext(c *cli.Context) Commit {
 	return Commit{
-		URL:     c.String("prev.commit.url"),
-		SHA:     c.String("prev.commit.sha"),
-		Ref:     c.String("prev.commit.ref"),
-		Refspec: c.String("prev.commit.refspec"),
-		Branch:  c.String("prev.commit.branch"),
-		Message: c.String("prev.commit.message"),
+		URL:         c.String("prev.commit.url"),
+		SHA:         c.String("prev.commit.sha"),
+		Ref:         c.String("prev.commit.ref"),
+		Refspec:     c.String("prev.commit.refspec"),
+		Branch:      c.String("prev.commit.branch"),
+		Message:     c.String("prev.commit.message"),
+		Title:       strings.Split(c.String("commit.message"), "\n")[0],
+		Description: strings.Split(c.String("commit.message"), "\n")[1],
 		Author: Author{
 			Name:   c.String("prev.commit.author.name"),
 			Email:  c.String("prev.commit.author.email"),

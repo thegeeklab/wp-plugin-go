@@ -13,7 +13,9 @@ func Test_currFromContext(t *testing.T) {
 		want map[string]string
 	}{
 		{
-			envs: map[string]string{},
+			envs: map[string]string{
+				"CI_COMMIT_MESSAGE": "",
+			},
 			want: map[string]string{
 				"title":   "",
 				"desc":    "",

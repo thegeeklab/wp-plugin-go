@@ -3,6 +3,7 @@ module github.com/thegeeklab/wp-plugin-go
 go 1.21
 
 require (
+	github.com/Masterminds/semver/v3 v3.2.0
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/joho/godotenv v1.5.1
 	github.com/rs/zerolog v1.31.0
@@ -12,7 +13,6 @@ require (
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
-	github.com/Masterminds/semver/v3 v3.2.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/huandu/xstrings v1.3.3 // indirect

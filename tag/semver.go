@@ -1,4 +1,4 @@
-package plugin
+package tag
 
 import (
 	"fmt"
@@ -71,30 +71,4 @@ func SemverTags(ref string, strict bool) ([]string, error) {
 		fmt.Sprintf("%v.%v", version.Major(), version.Minor()),
 		fmt.Sprintf("%v.%v.%v", version.Major(), version.Minor(), version.Patch()),
 	}, nil
-}
-
-// IsTaggable checks whether tags should be created for the specified ref.
-// The function returns true if the ref either matches the default branch
-// or is a tag ref.
-func IsTaggable(ref, defaultBranch string) bool {
-	if strings.HasPrefix(ref, "refs/tags/") {
-		return true
-	}
-
-	if stripHeadPrefix(ref) == defaultBranch {
-		return true
-	}
-
-	return false
-}
-
-func stripHeadPrefix(ref string) string {
-	return strings.TrimPrefix(ref, "refs/heads/")
-}
-
-func stripTagPrefix(ref string) string {
-	ref = strings.TrimPrefix(ref, "refs/tags/")
-	ref = strings.TrimPrefix(ref, "v")
-
-	return ref
 }

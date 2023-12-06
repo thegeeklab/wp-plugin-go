@@ -33,6 +33,7 @@ type Pipeline struct {
 	Parent       int64
 }
 
+//nolint:dupl
 func pipelineFlags(category string) []cli.Flag {
 	return []cli.Flag{
 		&cli.Int64Flag{
@@ -54,10 +55,9 @@ func pipelineFlags(category string) []cli.Flag {
 			Category: category,
 		},
 		&cli.StringFlag{
-			Name:  "pipeline.url",
-			Usage: "pipeline url",
-			// TODO: Revert after https://github.com/woodpecker-ci/woodpecker/issues/2219
-			// EnvVars:  []string{"CI_PIPELINE_URL"},
+			Name:     "pipeline.url",
+			Usage:    "pipeline url",
+			EnvVars:  []string{"CI_PIPELINE_URL"},
 			Category: category,
 		},
 		&cli.StringFlag{

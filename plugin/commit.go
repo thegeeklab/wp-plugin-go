@@ -153,6 +153,7 @@ func currFromContext(c *cli.Context) Commit {
 	}
 }
 
+//nolint:dupl
 func prevFlags(category string) []cli.Flag {
 	return []cli.Flag{
 		&cli.StringFlag{

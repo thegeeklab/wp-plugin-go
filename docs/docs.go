@@ -30,12 +30,12 @@ var templateFs embed.FS
 func ToMarkdown(app *cli.App) (string, error) {
 	var w bytes.Buffer
 
-	tpls, err := template.New("").ParseFS(templateFs, "templates/markdown.md.tmpl")
+	tpls, err := template.New("cli").ParseFS(templateFs, "**/*.tmpl")
 	if err != nil {
 		return "", err
 	}
 
-	if err := tpls.Execute(&w, GetTemplateData(app, 0)); err != nil {
+	if err := tpls.ExecuteTemplate(&w, "markdown.md.tmpl", GetTemplateData(app, 0)); err != nil {
 		return "", err
 	}
 

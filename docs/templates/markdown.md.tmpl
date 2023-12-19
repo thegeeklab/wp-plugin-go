@@ -1,35 +1,36 @@
 {{if gt .SectionNum 0}}% {{ .Name }} {{ .SectionNum }}
 
-{{end}}# NAME
+{{end}}## NAME
 
 {{ .Name }}{{ if .Usage }} - {{ .Usage }}{{ end }}
 
-# SYNOPSIS
+## SYNOPSIS
 
 {{ .Name }}
 {{ if .SynopsisArgs }}
-```
+```Plain
 {{ range $v := .SynopsisArgs }}{{ $v }}{{ end }}
 ```
 {{ end }}{{ if .Description }}
-# DESCRIPTION
+## DESCRIPTION
 
 {{ .Description }}
 {{ end }}
 **Usage**:
 
-```
+```Plain
 {{ if .UsageText -}}
 {{ .UsageText }}
-{{ else }}
+
+{{- else }}
 {{ .Name }} [GLOBAL OPTIONS] command [COMMAND OPTIONS] [ARGUMENTS...]
 {{- end }}
 ```
 {{ if .GlobalArgs }}
-# GLOBAL OPTIONS
+## GLOBAL OPTIONS
 {{ range $v := .GlobalArgs }}
 {{ $v }}{{ end }}
 {{ end }}{{ if .Commands }}
-# COMMANDS
+## COMMANDS
 {{ range $v := .Commands }}
 {{ $v }}{{ end }}{{ end }}

@@ -3,12 +3,6 @@ GOFUMPT_PACKAGE_VERSION := v0.5.0
 # renovate: datasource=github-releases depName=golangci/golangci-lint
 GOLANGCI_LINT_PACKAGE_VERSION := v1.55.2
 
-EXECUTABLE := wp-plugin-go
-
-DIST := dist
-DIST_DIRS := $(DIST)
-IMPORT := github.com/thegeeklab/$(EXECUTABLE)
-
 GO ?= go
 PACKAGES ?= $(shell go list ./...)
 SOURCES ?= $(shell find . -name "*.go" -type f)

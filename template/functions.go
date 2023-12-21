@@ -6,7 +6,7 @@ import (
 	"github.com/Masterminds/sprig/v3"
 )
 
-func loadFuncMap() template.FuncMap {
+func LoadFuncMap() template.FuncMap {
 	sprigFuncs := sprig.GenericFuncMap()
 	customFuncs := template.FuncMap{}
 

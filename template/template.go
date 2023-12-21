@@ -25,7 +25,7 @@ import (
 func Render(ctx context.Context, client http.Client, templateString string, payload interface{}) (string, error) {
 	var outString bytes.Buffer
 
-	tpl := new(template.Template).Funcs(loadFuncMap())
+	tpl := new(template.Template).Funcs(LoadFuncMap())
 
 	templateURL, err := url.Parse(templateString)
 	if err == nil {

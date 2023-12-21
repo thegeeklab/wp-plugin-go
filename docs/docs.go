@@ -7,6 +7,8 @@ import (
 	"sort"
 	"strings"
 
+	wp_template "github.com/thegeeklab/wp-plugin-go/template"
+
 	"github.com/urfave/cli/v2"
 )
 
@@ -34,7 +36,7 @@ var templateFs embed.FS
 func ToMarkdown(app *cli.App) (string, error) {
 	var w bytes.Buffer
 
-	tpls, err := template.New("cli").ParseFS(templateFs, "**/*.tmpl")
+	tpls, err := template.New("cli").Funcs(wp_template.LoadFuncMap()).ParseFS(templateFs, "**/*.tmpl")
 	if err != nil {
 		return "", err
 	}

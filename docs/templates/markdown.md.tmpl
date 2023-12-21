@@ -1,0 +1,15 @@
+{{ with .Name }}# {{ . }}{{ end }}
+{{- with .Description }}
+
+{{ . }}
+{{- end }}
+{{- if .GlobalArgs }}
+
+## Parameters
+{{ range $v := .GlobalArgs }}
+**_{{ $v.Name }}_**{{ with $v.Default }} (defaut: {{ . }}){{ end }}{{ if $v.Description }}{{ "\\" }}{{ end }}
+{{- with $v.Description }}
+&emsp;{{ . }}
+{{- end }}
+{{ end -}}
+{{ end -}}

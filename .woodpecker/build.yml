@@ -6,15 +6,14 @@ when:
       - ${CI_REPO_DEFAULT_BRANCH}
 
 steps:
-  changelog:
+  - name: changelog
     image: quay.io/thegeeklab/git-sv
     commands:
-      - git fetch --depth=2147483647
       - git sv current-version
       - git sv release-notes -t ${CI_COMMIT_TAG:-next} -o CHANGELOG.md
       - cat CHANGELOG.md
 
-  publish-github:
+  - name: publish-github
     image: docker.io/plugins/github-release
     settings:
       api_key:
@@ -23,7 +22,7 @@ steps:
       overwrite: true
       title: ${CI_COMMIT_TAG}
     when:
-    - event: [tag]
+      - event: [tag]
 
 depends_on:
   - test

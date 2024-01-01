@@ -42,6 +42,11 @@ func testApp() *cli.App {
 				Usage:   "slice flag",
 				EnvVars: []string{"PLUGIN_SLICE_FLAG"},
 			},
+			&cli.StringFlag{
+				Name:    "hidden.flag",
+				Usage:   "hidden flag",
+				EnvVars: []string{"HIDDEN_FLAG", "PLUGIN_HIDDEN_FLAG"},
+			},
 		},
 	}
 

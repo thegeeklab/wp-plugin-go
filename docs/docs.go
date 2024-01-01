@@ -78,6 +78,7 @@ func prepareArgsWithValues(flags []cli.Flag) []*PluginArg {
 
 func parseFlags(flags []cli.Flag) []*PluginArg {
 	args := make([]*PluginArg, 0)
+	namePrefix := "plugin_"
 
 	for _, f := range flags {
 		flag, ok := f.(cli.DocGenerationFlag)
@@ -87,10 +88,12 @@ func parseFlags(flags []cli.Flag) []*PluginArg {
 
 		modArg := &PluginArg{}
 
-		name := flag.GetEnvVars()[0]
-		name = strings.TrimPrefix(name, "PLUGIN_")
-		modArg.Name = strings.ToLower(strings.TrimSpace(name))
+		name := strings.ToLower(strings.TrimSpace(flag.GetEnvVars()[0]))
+		if !strings.HasPrefix(name, namePrefix) {
+			continue
+		}
 
+		modArg.Name = strings.TrimPrefix(name, namePrefix)
 		modArg.Description = flag.GetUsage()
 		modArg.Default = flag.GetDefaultText()
 

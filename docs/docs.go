@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"embed"
 	"html/template"
+	"reflect"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -17,6 +19,8 @@ type PluginArg struct {
 	EnvVars     []string
 	Description string
 	Default     string
+	Type        string
+	Required    bool
 }
 
 type CliTemplate struct {
@@ -90,6 +94,12 @@ func parseFlags(flags []cli.Flag) []*PluginArg {
 		modArg.Description = flag.GetUsage()
 		modArg.Default = flag.GetDefaultText()
 
+		if rf, _ := f.(cli.RequiredFlag); ok {
+			modArg.Required = rf.IsRequired()
+		}
+
+		modArg.Type = parseType(reflect.TypeOf(f).String())
+
 		args = append(args, modArg)
 	}
 
@@ -98,4 +108,26 @@ func parseFlags(flags []cli.Flag) []*PluginArg {
 	})
 
 	return args
+}
+
+func parseType(raw string) string {
+	reSlice := regexp.MustCompile(`^\*cli\.(.+?)SliceFlag$`)
+
+	if reSlice.MatchString(raw) {
+		return "list"
+	}
+
+	re := regexp.MustCompile(`^\*cli\.(.+?)Flag$`)
+	match := re.FindStringSubmatch(raw)
+
+	if len(match) > 1 {
+		switch ctype := strings.ToLower(match[1]); ctype {
+		case "int", "int64", "uint", "uint64", "float64":
+			return "number"
+		default:
+			return ctype
+		}
+	}
+
+	return ""
 }

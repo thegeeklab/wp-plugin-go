@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/kylelemons/godebug/pretty"
+	"github.com/google/go-cmp/cmp"
 	"github.com/urfave/cli/v2"
 )
 
@@ -137,8 +137,8 @@ func TestToData(t *testing.T) {
 	for _, tt := range tests {
 		got := GetTemplateData(tt.app)
 		t.Run(tt.name, func(t *testing.T) {
-			if diff := pretty.Compare(got, tt.want); diff != "" {
-				t.Errorf("template data diff: (-got +want)\n%s", diff)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("data mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}

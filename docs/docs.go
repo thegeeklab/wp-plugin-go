@@ -98,7 +98,7 @@ func parseFlags(flags []cli.Flag) []*PluginArg {
 			modArg.Required = rf.IsRequired()
 		}
 
-		modArg.Type = parseType(reflect.TypeOf(f))
+		modArg.Type = parseType(reflect.TypeOf(f).String())
 
 		args = append(args, modArg)
 	}
@@ -110,15 +110,15 @@ func parseFlags(flags []cli.Flag) []*PluginArg {
 	return args
 }
 
-func parseType(raw reflect.Type) string {
+func parseType(raw string) string {
 	reSlice := regexp.MustCompile(`^\*cli\.(.+?)SliceFlag$`)
 
-	if reSlice.MatchString(raw.String()) {
+	if reSlice.MatchString(raw) {
 		return "list"
 	}
 
 	re := regexp.MustCompile(`^\*cli\.(.+?)Flag$`)
-	match := re.FindStringSubmatch(raw.String())
+	match := re.FindStringSubmatch(raw)
 
 	if len(match) > 1 {
 		switch ctype := strings.ToLower(match[1]); ctype {

@@ -113,7 +113,7 @@ func TestToData(t *testing.T) {
 						Name:        "dummy_flag_int",
 						Description: "dummy int flag desc",
 						Default:     "10",
-						Type:        "number",
+						Type:        "integer",
 						Required:    true,
 					},
 					{

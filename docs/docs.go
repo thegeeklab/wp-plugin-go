@@ -115,9 +115,13 @@ func parseFlags(flags []cli.Flag) []*PluginArg {
 
 func parseType(raw string) string {
 	reSlice := regexp.MustCompile(`^\*cli\.(.+?)SliceFlag$`)
-
 	if reSlice.MatchString(raw) {
 		return "list"
+	}
+
+	reMap := regexp.MustCompile(`^\*cli\.(.+?)MapFlag$`)
+	if reMap.MatchString(raw) {
+		return "dict"
 	}
 
 	re := regexp.MustCompile(`^\*cli\.(.+?)Flag$`)
@@ -125,8 +129,10 @@ func parseType(raw string) string {
 
 	if len(match) > 1 {
 		switch ctype := strings.ToLower(match[1]); ctype {
-		case "int", "int64", "uint", "uint64", "float64":
-			return "number"
+		case "int", "int64", "uint", "uint64":
+			return "integer"
+		case "float64":
+			return "float"
 		default:
 			return ctype
 		}

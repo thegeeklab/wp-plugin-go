@@ -23,7 +23,7 @@ func testApp() *cli.App {
 			},
 			&cli.StringFlag{
 				Name:     "dummy-flag",
-				Usage:    "dummy flag desc",
+				Usage:    "Dummy flag desc.",
 				EnvVars:  []string{"PLUGIN_DUMMY_FLAG"},
 				Value:    "test",
 				Required: true,
@@ -104,7 +104,7 @@ func TestToData(t *testing.T) {
 				GlobalArgs: []*PluginArg{
 					{
 						Name:        "dummy_flag",
-						Description: "dummy flag desc",
+						Description: "Dummy flag desc.",
 						Default:     "\"test\"",
 						Type:        "string",
 						Required:    true,

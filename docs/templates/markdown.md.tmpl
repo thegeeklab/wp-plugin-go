@@ -1,7 +1,7 @@
 {{ with .Name }}# {{ . }}{{ end }}
 {{- with .Description }}
 
-{{ . }}
+{{ . | ToSentence }}
 {{- end }}
 {{- if .GlobalArgs }}
 
@@ -9,7 +9,7 @@
 {{ range $v := .GlobalArgs }}
 **_{{ $v.Name }}_**{{ with $v.Default }}{{ if $v.Required }} _required_{{ end }} (defaut: {{ . }}){{ end }}{{ if $v.Description }}{{ "\\" }}{{ end }}
 {{- with $v.Description }}
-&emsp;{{ . }}
+&emsp;{{ . | ToSentence }}
 {{- end }}
 {{ end -}}
 {{ end -}}

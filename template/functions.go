@@ -33,5 +33,20 @@ func ToSentence(s string) string {
 
 	r, n := utf8.DecodeRuneInString(s)
 
-	return fmt.Sprintf("%s%s.", string(unicode.ToUpper(r)), s[n:])
+	closer := ""
+	if getLastRune(s, 1) != "." {
+		closer = "."
+	}
+
+	return fmt.Sprintf("%s%s%s", string(unicode.ToUpper(r)), s[n:], closer)
+}
+
+func getLastRune(s string, c int) string {
+	j := len(s)
+	for i := 0; i < c && j > 0; i++ {
+		_, size := utf8.DecodeLastRuneInString(s[:j])
+		j -= size
+	}
+
+	return s[j:]
 }

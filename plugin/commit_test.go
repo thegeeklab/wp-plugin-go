@@ -51,7 +51,7 @@ func Test_currFromContext(t *testing.T) {
 
 		options := Options{
 			Name:    "dummy",
-			Execute: func(ctx context.Context) error { return nil },
+			Execute: func(_ context.Context) error { return nil },
 		}
 
 		got := New(options)

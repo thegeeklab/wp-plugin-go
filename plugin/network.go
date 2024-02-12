@@ -117,7 +117,7 @@ func NetworkFromContext(ctx *cli.Context) Network {
 		if contextDialer, ok := proxyDialer.(proxy.ContextDialer); ok {
 			transport.DialContext = contextDialer.DialContext
 		} else {
-			transport.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+			transport.DialContext = func(_ context.Context, network, addr string) (net.Conn, error) {
 				return proxyDialer.Dial(network, addr)
 			}
 		}

@@ -23,6 +23,5 @@ func TestSplitWithEscaping(t *testing.T) {
 		got, want := strings, tt.output
 
 		assert.Equal(t, got, want)
-
 	}
 }

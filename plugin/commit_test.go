@@ -4,15 +4,18 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/urfave/cli/v2"
 )
 
 func Test_currFromContext(t *testing.T) {
 	tests := []struct {
+		name string
 		envs map[string]string
 		want map[string]string
 	}{
 		{
+			name: "empty commit message",
 			envs: map[string]string{
 				"CI_COMMIT_MESSAGE": "",
 			},
@@ -23,6 +26,7 @@ func Test_currFromContext(t *testing.T) {
 			},
 		},
 		{
+			name: "commit message with title and desc",
 			envs: map[string]string{
 				"CI_COMMIT_MESSAGE": "test_title\ntest_desc",
 			},
@@ -33,6 +37,7 @@ func Test_currFromContext(t *testing.T) {
 			},
 		},
 		{
+			name: "commit message with title, desc and additional",
 			envs: map[string]string{
 				"CI_COMMIT_MESSAGE": "test_title\ntest_desc\nadditional",
 			},
@@ -63,16 +68,55 @@ func Test_currFromContext(t *testing.T) {
 
 		_ = got.App.Run([]string{"dummy"})
 
-		if got.Metadata.Curr.Message != tt.want["message"] {
-			t.Errorf("got = %q, want = %q", got.Metadata.Curr.Message, tt.want["message"])
-		}
+		assert.Equal(t, got.Metadata.Curr.Message, tt.want["message"])
+		assert.Equal(t, got.Metadata.Curr.Title, tt.want["title"])
+		assert.Equal(t, got.Metadata.Curr.Description, tt.want["desc"])
+	}
+}
 
-		if got.Metadata.Curr.Title != tt.want["title"] {
-			t.Errorf("got = %q, want = %q", got.Metadata.Curr.Title, tt.want["title"])
-		}
+func TestSplitMessage(t *testing.T) {
+	testCases := []struct {
+		name            string
+		message         string
+		wantTitle       string
+		wantDescription string
+	}{
+		{
+			name:            "empty message",
+			message:         "",
+			wantTitle:       "",
+			wantDescription: "",
+		},
+		{
+			name:            "only title",
+			message:         "Title",
+			wantTitle:       "Title",
+			wantDescription: "",
+		},
+		{
+			name:            "title and description",
+			message:         "Title\nDescription",
+			wantTitle:       "Title",
+			wantDescription: "Description",
+		},
+		{
+			name:            "title and description with blank line",
+			message:         "Title\n\nDescription with blank line",
+			wantTitle:       "Title",
+			wantDescription: "\nDescription with blank line",
+		},
+		{
+			name:            "title and description with multiple blank lines",
+			message:         "Title\n\n\nMultiple blank lines\nDescription",
+			wantTitle:       "Title",
+			wantDescription: "\n\nMultiple blank lines\nDescription",
+		},
+	}
 
-		if got.Metadata.Curr.Description != tt.want["desc"] {
-			t.Errorf("got = %q, want = %q", got.Metadata.Curr.Description, tt.want["desc"])
-		}
+	for _, tc := range testCases {
+		gotTitle, gotDescription := splitMessage(tc.message)
+
+		assert.Equal(t, tc.wantTitle, gotTitle)
+		assert.Equal(t, tc.wantDescription, gotDescription)
 	}
 }

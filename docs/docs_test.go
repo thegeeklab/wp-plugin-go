@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/assert"
 	"github.com/urfave/cli/v2"
 )
 
@@ -81,10 +81,10 @@ func TestToMarkdownFull(t *testing.T) {
 
 	for _, tt := range tests {
 		want := testFileContent(t, tt.want)
+
 		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := ToMarkdown(tt.app); got != want {
-				t.Errorf("got = %v, want %v", got, want)
-			}
+			got, _ := ToMarkdown(tt.app)
+			assert.Equal(t, want, got)
 		})
 	}
 }
@@ -141,10 +141,9 @@ func TestToData(t *testing.T) {
 
 	for _, tt := range tests {
 		got := GetTemplateData(tt.app)
+
 		t.Run(tt.name, func(t *testing.T) {
-			if diff := cmp.Diff(tt.want, got); diff != "" {
-				t.Errorf("data mismatch (-want +got):\n%s", diff)
-			}
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

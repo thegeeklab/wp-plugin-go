@@ -233,6 +233,10 @@ func prevFromContext(c *cli.Context) Commit {
 	}
 }
 
+// splitMessage splits a commit message into a title and description.
+// It splits the message on the first newline character, with the first
+// line as the title, and the rest as the description. If there is no newline,
+// the entire message is returned as the title, and the description is empty.
 func splitMessage(message string) (string, string) {
 	//nolint:gomnd
 	switch parts := strings.SplitN(message, "\n", 2); len(parts) {

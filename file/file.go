@@ -1,6 +1,8 @@
 package file
 
-import "os"
+import (
+	"os"
+)
 
 // The MSDN docs appear to say that a normal path that is 248 bytes long will work;
 // empirically the path must be less then 248 bytes long.
@@ -30,6 +32,9 @@ func ReadStringOrFile(input string) (string, bool, error) {
 	return string(result), true, nil
 }
 
+// DeleteDir deletes the directory at the given path.
+// It returns nil if the deletion succeeds, or the deletion error otherwise.
+// If the directory does not exist, DeleteDir returns nil.
 func DeleteDir(path string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return nil

@@ -1,28 +1,28 @@
 package types
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSplitWithEscaping(t *testing.T) {
 	tests := []struct {
-		Input  string
-		Output []string
+		input  string
+		output []string
 	}{
-		{"", []string{}},
-		{"a,b", []string{"a", "b"}},
-		{",,,", []string{"", "", "", ""}},
-		{",a\\,", []string{"", "a,"}},
-		{"a,b\\,c\\\\d,e", []string{"a", "b,c\\\\d", "e"}},
+		{input: "", output: []string{}},
+		{input: "a,b", output: []string{"a", "b"}},
+		{input: ",,,", output: []string{"", "", "", ""}},
+		{input: ",a\\,", output: []string{"", "a,"}},
+		{input: "a,b\\,c\\\\d,e", output: []string{"a", "b,c\\\\d", "e"}},
 	}
 
-	for _, test := range tests {
-		strings := splitWithEscaping(test.Input, ",", "\\")
-		got, want := strings, test.Output
+	for _, tt := range tests {
+		strings := splitWithEscaping(tt.input, ",", "\\")
+		got, want := strings, tt.output
 
-		if !reflect.DeepEqual(got, want) {
-			t.Errorf("Got tag %v, want %v", got, want)
-		}
+		assert.Equal(t, got, want)
+
 	}
 }

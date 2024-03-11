@@ -80,9 +80,8 @@ func TestToMarkdownFull(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		want := testFileContent(t, tt.want)
-
 		t.Run(tt.name, func(t *testing.T) {
+			want := testFileContent(t, tt.want)
 			got, _ := ToMarkdown(tt.app)
 			assert.Equal(t, want, got)
 		})
@@ -140,9 +139,8 @@ func TestToData(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := GetTemplateData(tt.app)
-
 		t.Run(tt.name, func(t *testing.T) {
+			got := GetTemplateData(tt.app)
 			assert.Equal(t, tt.want, got)
 		})
 	}

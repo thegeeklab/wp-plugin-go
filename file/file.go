@@ -1,7 +1,9 @@
 package file
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
 )
 
 // The MSDN docs appear to say that a normal path that is 248 bytes long will work;
@@ -41,4 +43,25 @@ func DeleteDir(path string) error {
 	}
 
 	return os.Remove(path)
+}
+
+// ExpandFileList takes a list of file globs and expands them into a list
+// of matching file paths. It returns the expanded file list and any errors
+// from glob matching. This allows safely passing user input globs through to
+// glob matching.
+func ExpandFileList(fileList []string) ([]string, error) {
+	var result []string
+
+	for _, glob := range fileList {
+		globbed, err := filepath.Glob(glob)
+		if err != nil {
+			return result, fmt.Errorf("failed to match %s: %w", glob, err)
+		}
+
+		if globbed != nil {
+			result = append(result, globbed...)
+		}
+	}
+
+	return result, nil
 }

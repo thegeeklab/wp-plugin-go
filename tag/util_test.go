@@ -44,7 +44,9 @@ func TestIsTaggable(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := IsTaggable(tt.args.ref, tt.args.defaultBranch)
-		assert.Equal(t, got, tt.want, "%q. IsTaggable() = %v, want %v", tt.name, got, tt.want)
+		t.Run(tt.name, func(t *testing.T) {
+			got := IsTaggable(tt.args.ref, tt.args.defaultBranch)
+			assert.Equal(t, got, tt.want, "%q. IsTaggable() = %v, want %v", tt.name, got, tt.want)
+		})
 	}
 }

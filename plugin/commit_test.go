@@ -59,23 +59,25 @@ func Test_currFromContext(t *testing.T) {
 			Execute: func(_ context.Context) error { return nil },
 		}
 
-		got := New(options)
-		got.App.Action = func(ctx *cli.Context) error {
-			got.Metadata = MetadataFromContext(ctx)
+		t.Run(tt.name, func(t *testing.T) {
+			got := New(options)
+			got.App.Action = func(ctx *cli.Context) error {
+				got.Metadata = MetadataFromContext(ctx)
 
-			return nil
-		}
+				return nil
+			}
 
-		_ = got.App.Run([]string{"dummy"})
+			_ = got.App.Run([]string{"dummy"})
 
-		assert.Equal(t, got.Metadata.Curr.Message, tt.want["message"])
-		assert.Equal(t, got.Metadata.Curr.Title, tt.want["title"])
-		assert.Equal(t, got.Metadata.Curr.Description, tt.want["desc"])
+			assert.Equal(t, got.Metadata.Curr.Message, tt.want["message"])
+			assert.Equal(t, got.Metadata.Curr.Title, tt.want["title"])
+			assert.Equal(t, got.Metadata.Curr.Description, tt.want["desc"])
+		})
 	}
 }
 
 func TestSplitMessage(t *testing.T) {
-	testCases := []struct {
+	tests := []struct {
 		name            string
 		message         string
 		wantTitle       string
@@ -113,10 +115,12 @@ func TestSplitMessage(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
-		gotTitle, gotDescription := splitMessage(tc.message)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotTitle, gotDescription := splitMessage(tt.message)
 
-		assert.Equal(t, tc.wantTitle, gotTitle)
-		assert.Equal(t, tc.wantDescription, gotDescription)
+			assert.Equal(t, tt.wantTitle, gotTitle)
+			assert.Equal(t, tt.wantDescription, gotDescription)
+		})
 	}
 }

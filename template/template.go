@@ -78,7 +78,9 @@ func RenderTrim(ctx context.Context, client http.Client, template string, playlo
 	return strings.Trim(out, " \n"), err
 }
 
-// AddPrefix is a helper function to ensure a string has a defined prefix.
+// AddPrefix prepends the prefix string to the input string if the input
+// string does not already have the prefix. It trims any leading or trailing
+// space from the input before checking for the prefix.
 func AddPrefix(prefix, input string) string {
 	if strings.TrimSpace(input) == "" {
 		return input

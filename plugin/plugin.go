@@ -27,6 +27,37 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+//nolint:lll
+const appHelpTemplate = `NAME:
+   {{template "helpNameTemplate" .}}
+
+USAGE:
+   {{if .UsageText}}{{wrap .UsageText 3}}{{else}}{{.HelpName}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}{{if .Args}}[arguments...]{{end}}{{end}}{{end}}{{if .Version}}{{if not .HideVersion}}
+
+VERSION:
+   {{.Version}}{{end}}{{end}}{{if .Description}}
+
+DESCRIPTION:
+   {{template "descriptionTemplate" .}}{{end}}
+{{- if len .Authors}}
+
+AUTHOR{{template "authorsTemplate" .}}{{end}}{{if .VisibleCommands}}
+
+COMMANDS:{{template "visibleCommandCategoryTemplate" .}}{{end}}{{if .VisibleFlagCategories}}
+
+GLOBAL OPTIONS:{{range .VisibleFlagCategories}}{{if and .Name (ne .Name "Plugin Flags")}}{{continue}}{{end}}
+   {{if .Name}}{{.Name}}
+
+   {{end}}{{$flglen := len .Flags}}{{range $i, $e := .Flags}}{{if eq (subtract $flglen $i) 1}}{{$e}}
+   {{else}}{{$e}}
+   {{end}}{{end}}{{end}}{{else if .VisibleFlags}}
+
+GLOBAL OPTIONS:{{template "visibleFlagTemplate" .}}{{end}}{{if .Copyright}}
+
+COPYRIGHT:
+   {{template "copyrightTemplate" .}}{{end}}
+`
+
 // Options defines the options for the plugin.
 type Options struct {
 	// Name of the plugin.
@@ -41,6 +72,8 @@ type Options struct {
 	Flags []cli.Flag
 	// Execute function of the plugin.
 	Execute ExecuteFunc
+	// Hide woodpecker system flags.
+	HideWoodpeckerFlags bool
 }
 
 // Plugin defines the plugin instance.
@@ -68,6 +101,12 @@ func New(opt Options) *Plugin {
 		Usage:   opt.Description,
 		Version: opt.Version,
 		Flags:   append(opt.Flags, Flags()...),
+		Before:  SetupConsoleLogger,
+		After:   SetupConsoleLogger,
+	}
+
+	if opt.HideWoodpeckerFlags {
+		app.CustomAppHelpTemplate = appHelpTemplate
 	}
 
 	cli.VersionPrinter = func(c *cli.Context) {
@@ -85,10 +124,6 @@ func New(opt Options) *Plugin {
 }
 
 func (p *Plugin) action(ctx *cli.Context) error {
-	if err := SetupConsoleLogger(ctx); err != nil {
-		return err
-	}
-
 	p.Metadata = MetadataFromContext(ctx)
 	p.Network = NetworkFromContext(ctx)
 	p.Context = ctx

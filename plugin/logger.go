@@ -26,8 +26,8 @@ func loggingFlags(category string) []cli.Flag {
 	return []cli.Flag{
 		&cli.StringFlag{
 			Name:     "log-level",
-			Usage:    "log level",
-			EnvVars:  []string{"CI_LOG_LEVEL"},
+			Usage:    "plugin log level",
+			EnvVars:  []string{"PLUGIN_LOG_LEVEL"},
 			Value:    "info",
 			Category: category,
 		},
@@ -51,7 +51,7 @@ func SetupConsoleLogger(c *cli.Context) error {
 
 	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
 		log.Logger = log.With().Caller().Logger()
-		log.Log().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
+		log.Info().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
 	}
 
 	return nil

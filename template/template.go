@@ -22,12 +22,12 @@ import (
 // format. Trailing or leading spaces or new-lines are not getting truncated. It
 // is able to read templates from remote paths, local files or directly from the
 // string.
-func Render(ctx context.Context, client http.Client, templateString string, payload interface{}) (string, error) {
+func Render(ctx context.Context, client http.Client, tmpl string, payload interface{}) (string, error) {
 	var outString bytes.Buffer
 
 	tpl := new(template.Template).Funcs(LoadFuncMap())
 
-	templateURL, err := url.Parse(templateString)
+	templateURL, err := url.Parse(tmpl)
 	if err == nil {
 		switch templateURL.Scheme {
 		case "http", "https":
@@ -48,18 +48,18 @@ func Render(ctx context.Context, client http.Client, templateString string, payl
 				return "", fmt.Errorf("failed to read: %w", err)
 			}
 
-			templateString = string(out)
+			tmpl = string(out)
 		case "file":
 			out, err := os.ReadFile(templateURL.Path)
 			if err != nil {
 				return "", fmt.Errorf("failed to read: %w", err)
 			}
 
-			templateString = string(out)
+			tmpl = string(out)
 		}
 	}
 
-	tpl, err = tpl.Parse(templateString)
+	tpl, err = tpl.Parse(tmpl)
 	if err != nil {
 		return "", err
 	}
@@ -72,8 +72,8 @@ func Render(ctx context.Context, client http.Client, templateString string, payl
 // RenderTrim parses and executes a template, returning the results in string
 // format. The result is trimmed to remove left and right padding and newlines
 // that may be added unintentially in the template markup.
-func RenderTrim(ctx context.Context, client http.Client, template string, playload interface{}) (string, error) {
-	out, err := Render(ctx, client, template, playload)
+func RenderTrim(ctx context.Context, client http.Client, tmpl string, playload interface{}) (string, error) {
+	out, err := Render(ctx, client, tmpl, playload)
 
 	return strings.Trim(out, " \n"), err
 }

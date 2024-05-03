@@ -57,7 +57,7 @@ func networkFlags(category string) []cli.Flag {
 		&cli.BoolFlag{
 			Name:     "transport.skip-verify",
 			Usage:    "skip ssl verify",
-			EnvVars:  []string{"CI_SKIP_VERIFY"},
+			EnvVars:  []string{"PLUGIN_SKIP_VERIFY"},
 			Category: category,
 		},
 		&cli.StringFlag{

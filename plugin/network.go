@@ -45,8 +45,8 @@ type Network struct {
 	//nolint:containedctx
 	Context context.Context
 
-	/// Whether SSL verification is skipped
-	SkipVerify bool
+	/// Whether SSL verification is skipped or not.
+	InsecureSkipVerify bool
 
 	// Client for making network requests.
 	Client *http.Client
@@ -55,9 +55,9 @@ type Network struct {
 func networkFlags(category string) []cli.Flag {
 	return []cli.Flag{
 		&cli.BoolFlag{
-			Name:     "transport.skip-verify",
-			Usage:    "skip ssl verify",
-			EnvVars:  []string{"PLUGIN_SKIP_VERIFY"},
+			Name:     "transport.insecure-skip-verify",
+			Usage:    "skip SSL verification",
+			EnvVars:  []string{"PLUGIN_INSECURE_SKIP_VERIFY"},
 			Category: category,
 		},
 		&cli.StringFlag{
@@ -77,7 +77,7 @@ func networkFlags(category string) []cli.Flag {
 
 func NetworkFromContext(ctx *cli.Context) Network {
 	var (
-		skip           = ctx.Bool("transport.skip-verify")
+		skipVerify     = ctx.Bool("transport.insecure-skip-verify")
 		defaultContext = context.Background()
 		socks          = ctx.String("transport.socks-proxy")
 		socksoff       = ctx.Bool("transport.socks-proxy-off")
@@ -90,7 +90,7 @@ func NetworkFromContext(ctx *cli.Context) Network {
 
 	tlsConfig := &tls.Config{
 		RootCAs:            certs,
-		InsecureSkipVerify: skip, //nolint:gosec
+		InsecureSkipVerify: skipVerify, //nolint:gosec
 	}
 
 	transport := &http.Transport{
@@ -134,8 +134,8 @@ func NetworkFromContext(ctx *cli.Context) Network {
 	}
 
 	return Network{
-		Context:    defaultContext,
-		SkipVerify: skip,
-		Client:     client,
+		Context:            defaultContext,
+		InsecureSkipVerify: skipVerify,
+		Client:             client,
 	}
 }

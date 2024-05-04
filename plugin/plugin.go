@@ -111,7 +111,7 @@ func New(opt Options) *Plugin {
 
 	cli.VersionPrinter = func(c *cli.Context) {
 		version := fmt.Sprintf("%s version=%s %s\n", c.App.Name, c.App.Version, opt.VersionMetadata)
-		fmt.Print(strings.TrimSpace(version))
+		fmt.Println(strings.TrimSpace(version))
 	}
 
 	plugin := &Plugin{

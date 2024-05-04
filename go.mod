@@ -1,4 +1,4 @@
-module github.com/thegeeklab/wp-plugin-go
+module github.com/thegeeklab/wp-plugin-go/v2
 
 go 1.22
 

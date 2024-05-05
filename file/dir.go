@@ -32,8 +32,8 @@ func IsDir(path string) (bool, error) {
 	return false, err
 }
 
-// IsDirEmpty returns whether the given directory path is empty.
-// If the path does not exist or is not a directory, it returns (false, err).
+// IsDirEmpty checks if the directory at the given path is empty.
+// It returns true if the directory is empty, false if not empty, or an error if there was a problem checking it.
 func IsDirEmpty(path string) (bool, error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -43,7 +43,7 @@ func IsDirEmpty(path string) (bool, error) {
 
 	_, err = f.Readdir(1)
 	if err == nil {
-		return true, nil
+		return false, nil
 	}
 
 	if errors.Is(err, io.EOF) {

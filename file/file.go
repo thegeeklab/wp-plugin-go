@@ -34,17 +34,6 @@ func ReadStringOrFile(input string) (string, bool, error) {
 	return string(result), true, nil
 }
 
-// DeleteDir deletes the directory at the given path.
-// It returns nil if the deletion succeeds, or the deletion error otherwise.
-// If the directory does not exist, DeleteDir returns nil.
-func DeleteDir(path string) error {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return nil
-	}
-
-	return os.Remove(path)
-}
-
 // ExpandFileList takes a list of file globs and expands them into a list
 // of matching file paths. It returns the expanded file list and any errors
 // from glob matching. This allows safely passing user input globs through to

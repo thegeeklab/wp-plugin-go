@@ -12,10 +12,14 @@ import (
 type Cmd struct {
 	*execabs.Cmd
 	Private bool
-	Trace   bool
+	Trace   *bool
 }
 
 func (c *Cmd) Run() error {
+	if c.Trace == nil {
+		c.SetTrace(true)
+	}
+
 	if c.Env == nil {
 		c.Env = os.Environ()
 	}
@@ -32,7 +36,7 @@ func (c *Cmd) Run() error {
 		c.Stdout = io.Discard
 	}
 
-	if c.Trace {
+	if *c.Trace {
 		fmt.Fprintf(os.Stdout, "+ %s\n", strings.Join(c.Args, " "))
 	}
 
@@ -41,4 +45,8 @@ func (c *Cmd) Run() error {
 	}
 
 	return c.Wait()
+}
+
+func (c *Cmd) SetTrace(trace bool) {
+	c.Trace = &trace
 }

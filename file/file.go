@@ -54,3 +54,21 @@ func ExpandFileList(fileList []string) ([]string, error) {
 
 	return result, nil
 }
+
+// WriteTmpFile creates a temporary file with the given name and content, and returns the path to the created file.
+func WriteTmpFile(name, content string) (string, error) {
+	tmpfile, err := os.CreateTemp("", name)
+	if err != nil {
+		return "", err
+	}
+
+	if _, err := tmpfile.Write([]byte(content)); err != nil {
+		return "", err
+	}
+
+	if err := tmpfile.Close(); err != nil {
+		return "", err
+	}
+
+	return tmpfile.Name(), nil
+}

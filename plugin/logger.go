@@ -36,7 +36,11 @@ func loggingFlags(category string) []cli.Flag {
 
 // SetupConsoleLogger sets up the console logger.
 func SetupConsoleLogger(c *cli.Context) error {
-	level := c.String("log-level")
+	level := "info"
+
+	if c != nil {
+		level = c.String("log-level")
+	}
 
 	lvl, err := zerolog.ParseLevel(level)
 	if err != nil {

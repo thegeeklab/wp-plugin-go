@@ -96,13 +96,14 @@ func New(opt Options) *Plugin {
 		_ = godotenv.Overload("/run/woodpecker/env")
 	}
 
+	_ = SetupConsoleLogger(nil)
+
 	app := &cli.App{
 		Name:    opt.Name,
 		Usage:   opt.Description,
 		Version: opt.Version,
 		Flags:   append(opt.Flags, Flags()...),
 		Before:  SetupConsoleLogger,
-		After:   SetupConsoleLogger,
 	}
 
 	if opt.HideWoodpeckerFlags {

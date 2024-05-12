@@ -28,7 +28,7 @@ func splitWithEscaping(in, separator, escapeString string) []string {
 
 	out := strings.Split(in, separator)
 
-	//nolint:gomnd
+	//nolint:mnd
 	for i := len(out) - 2; i >= 0; i-- {
 		if strings.HasSuffix(out[i], escapeString) {
 			out[i] = out[i][:len(out[i])-len(escapeString)] + separator + out[i+1]

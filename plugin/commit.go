@@ -238,11 +238,11 @@ func prevFromContext(c *cli.Context) Commit {
 // line as the title, and the rest as the description. If there is no newline,
 // the entire message is returned as the title, and the description is empty.
 func splitMessage(message string) (string, string) {
-	//nolint:gomnd
+	//nolint:mnd
 	switch parts := strings.SplitN(message, "\n", 2); len(parts) {
 	case 1:
 		return parts[0], ""
-	//nolint:gomnd
+	//nolint:mnd
 	case 2:
 		return parts[0], parts[1]
 	}

@@ -12,9 +12,6 @@ import (
 	"fmt"
 	"net/http/httptrace"
 	"net/textproto"
-	"os"
-	"os/exec"
-	"strings"
 
 	"github.com/rs/zerolog/log"
 )
@@ -119,9 +116,4 @@ func HTTP(ctx context.Context) context.Context {
 			log.Trace().Err(reqInfo.Err).Msg("ClientTrace.WroteRequest")
 		},
 	})
-}
-
-// Cmd prints the executed command to stdout.
-func Cmd(cmd *exec.Cmd) {
-	fmt.Fprintf(os.Stdout, "+ %s\n", strings.Join(cmd.Args, " "))
 }

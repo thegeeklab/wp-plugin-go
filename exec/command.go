@@ -34,12 +34,18 @@ func (c *Cmd) Run() error {
 	return c.Wait()
 }
 
-// Command creates a new Cmd with the given name and arguments. The Cmd is configured
-// to use the current environment, and to write its stdout and stderr to the
-// process's stdout and stderr.
-func Command(name string, arg ...string) *Cmd {
+// Command creates a new Cmd struct with the given name and arguments. It looks up the
+// absolute path of the executable using execabs.LookPath, and sets up the Cmd with
+// the necessary environment and output streams. The Cmd is configured to trace
+// the command execution by setting Trace to true and TraceWriter to os.Stdout.
+func Command(name string, arg ...string) (*Cmd, error) {
+	abs, err := execabs.LookPath(name)
+	if err != nil {
+		return nil, fmt.Errorf("could not find executable %q: %w", name, err)
+	}
+
 	cmd := &Cmd{
-		Cmd:         execabs.Command(name, arg...),
+		Cmd:         execabs.Command(abs, arg...),
 		Trace:       true,
 		TraceWriter: os.Stdout,
 	}
@@ -48,5 +54,5 @@ func Command(name string, arg ...string) *Cmd {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	return cmd
+	return cmd, nil
 }

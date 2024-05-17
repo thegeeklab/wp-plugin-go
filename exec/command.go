@@ -51,8 +51,6 @@ func Command(name string, arg ...string) (*Cmd, error) {
 	}
 
 	cmd.Env = os.Environ()
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 
 	return cmd, nil
 }

@@ -24,7 +24,7 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/thegeeklab/wp-plugin-go/v2/trace"
+	plugin_trace "github.com/thegeeklab/wp-plugin-go/v3/trace"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/net/proxy"
 )
@@ -126,7 +126,7 @@ func NetworkFromContext(ctx *cli.Context) Network {
 	}
 
 	if zerolog.GlobalLevel() == zerolog.TraceLevel {
-		defaultContext = trace.HTTP(defaultContext)
+		defaultContext = plugin_trace.HTTP(defaultContext)
 	}
 
 	client := &http.Client{

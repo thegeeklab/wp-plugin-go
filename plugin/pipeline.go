@@ -33,7 +33,6 @@ type Pipeline struct {
 	Parent       int64
 }
 
-//nolint:dupl
 func pipelineFlags(category string) []cli.Flag {
 	return []cli.Flag{
 		&cli.Int64Flag{

@@ -46,6 +46,7 @@ func pipelineFlags(category string) []cli.Flag {
 			Name:     "pipeline.status",
 			Usage:    "pipeline status",
 			EnvVars:  []string{"CI_PIPELINE_STATUS"},
+			Value:    "unknown",
 			Category: category,
 		},
 		&cli.StringFlag{

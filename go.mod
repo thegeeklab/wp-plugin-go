@@ -3,7 +3,7 @@ module github.com/thegeeklab/wp-plugin-go/v3
 go 1.23.3
 
 require (
-	github.com/Masterminds/semver/v3 v3.3.0
+	github.com/Masterminds/semver/v3 v3.3.1
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/joho/godotenv v1.5.1
 	github.com/rs/zerolog v1.33.0

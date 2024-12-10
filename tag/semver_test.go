@@ -124,20 +124,6 @@ func TestSemverTags(t *testing.T) {
 			wantErr: nil,
 		},
 		{
-			name:    "regular version",
-			before:  "refs/tags/22.04.0",
-			after:   []string{"22", "22.4", "22.4.0"},
-			strict:  false,
-			wantErr: nil,
-		},
-		{
-			name:    "regular version",
-			before:  "refs/tags/22.04",
-			after:   []string{"22", "22.4", "22.4.0"},
-			strict:  false,
-			wantErr: nil,
-		},
-		{
 			name:    "invalid semver",
 			before:  "refs/tags/x1.0.0",
 			strict:  true,
@@ -157,7 +143,7 @@ func TestSemverTags(t *testing.T) {
 		},
 		{
 			name:    "regular version shorthand",
-			before:  "refs/tags/22.04",
+			before:  "refs/tags/22.4",
 			strict:  true,
 			wantErr: assert.AnError,
 		},

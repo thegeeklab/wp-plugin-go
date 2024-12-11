@@ -9,6 +9,11 @@ import (
 )
 
 func TestCmdRun(t *testing.T) {
+	echoPath, err := exec.LookPath("echo")
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	tests := []struct {
 		name       string
 		cmd        *Cmd
@@ -22,7 +27,7 @@ func TestCmdRun(t *testing.T) {
 			cmd: &Cmd{
 				Trace: true,
 				Cmd: &exec.Cmd{
-					Path: "/usr/bin/echo",
+					Path: echoPath,
 					Args: []string{"echo", "hello"},
 				},
 			},
@@ -34,7 +39,7 @@ func TestCmdRun(t *testing.T) {
 			cmd: &Cmd{
 				Trace: false,
 				Cmd: &exec.Cmd{
-					Path: "/usr/bin/echo",
+					Path: echoPath,
 					Args: []string{"echo", "hello"},
 				},
 			},

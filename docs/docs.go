@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	plugin_template "github.com/thegeeklab/wp-plugin-go/v3/template"
+	plugin_template "github.com/thegeeklab/wp-plugin-go/v4/template"
 
 	"github.com/urfave/cli/v2"
 )

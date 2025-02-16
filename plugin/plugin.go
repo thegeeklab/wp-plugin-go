@@ -84,7 +84,8 @@ type Plugin struct {
 	// Network options.
 	Network Network
 	// Metadata of the current pipeline.
-	Metadata Metadata
+	Metadata    Metadata
+	Environment Environment
 }
 
 // ExecuteFunc defines the function that is executed by the plugin.
@@ -125,8 +126,16 @@ func New(opt Options) *Plugin {
 }
 
 func (p *Plugin) action(ctx *cli.Context) error {
+	var err error
+
 	p.Metadata = MetadataFromContext(ctx)
 	p.Network = NetworkFromContext(ctx)
+
+	p.Environment, err = EnvironmentFromContext(ctx)
+	if err != nil {
+		return err
+	}
+
 	p.Context = ctx
 
 	if p.Metadata.Pipeline.URL == "" {

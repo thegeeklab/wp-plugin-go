@@ -42,6 +42,7 @@ func Flags() []cli.Flag {
 	// Plugin flags
 	flags = append(flags, loggingFlags(FlagsPluginCategory)...)
 	flags = append(flags, networkFlags(FlagsPluginCategory)...)
+	flags = append(flags, environmentFlags(FlagsPluginCategory)...)
 
 	return flags
 }

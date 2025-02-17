@@ -25,6 +25,16 @@ func (e Environment) Lookup(key string) (string, bool) {
 	return os.LookupEnv(key)
 }
 
+// Value returns a slice of strings representing the key-value pairs of the
+// Environment. Each string is formatted as "key=value".
+func (e Environment) Value() []string {
+	values := make([]string, 0, len(e))
+	for key, value := range e {
+		values = append(values, fmt.Sprintf("%s=%s", key, value))
+	}
+	return values
+}
+
 func environmentFlags(category string) []cli.Flag {
 	return []cli.Flag{
 		&cli.GenericFlag{

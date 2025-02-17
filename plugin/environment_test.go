@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -71,6 +72,62 @@ func TestEnvironment_Lookup(t *testing.T) {
 			got, ok := tt.env.Lookup(tt.key)
 			assert.Equal(t, tt.want, got)
 			assert.Equal(t, tt.wantOk, ok)
+		})
+	}
+}
+
+func TestEnvironment_Value(t *testing.T) {
+	tests := []struct {
+		name string
+		env  Environment
+		want []string
+	}{
+		{
+			name: "empty environment",
+			env:  Environment{},
+			want: []string{},
+		},
+		{
+			name: "single key-value pair",
+			env: Environment{
+				"KEY1": "value1",
+			},
+			want: []string{"KEY1=value1"},
+		},
+		{
+			name: "multiple key-value pairs",
+			env: Environment{
+				"KEY1": "value1",
+				"KEY2": "value2",
+				"KEY3": "value3",
+			},
+			want: []string{"KEY1=value1", "KEY2=value2", "KEY3=value3"},
+		},
+		{
+			name: "keys with empty values",
+			env: Environment{
+				"EMPTY1": "",
+				"EMPTY2": "",
+			},
+			want: []string{"EMPTY1=", "EMPTY2="},
+		},
+		{
+			name: "values with special characters",
+			env: Environment{
+				"SPECIAL": "value=with=equals",
+				"SPACES":  "value with spaces",
+			},
+			want: []string{"SPECIAL=value=with=equals", "SPACES=value with spaces"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.env.Value()
+			// Sort both slices to ensure consistent comparison
+			sort.Strings(got)
+			sort.Strings(tt.want)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

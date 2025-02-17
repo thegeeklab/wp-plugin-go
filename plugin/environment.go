@@ -32,6 +32,7 @@ func (e Environment) Value() []string {
 	for key, value := range e {
 		values = append(values, fmt.Sprintf("%s=%s", key, value))
 	}
+
 	return values
 }
 

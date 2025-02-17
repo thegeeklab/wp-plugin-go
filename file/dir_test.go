@@ -10,11 +10,7 @@ import (
 
 func TestIsDirEmpty(t *testing.T) {
 	t.Run("empty directory", func(t *testing.T) {
-		dir, err := os.MkdirTemp("", "test")
-		if err != nil {
-			t.Fatalf("failed to create temp dir: %v", err)
-		}
-		defer os.RemoveAll(dir)
+		dir := t.TempDir()
 
 		isEmpty, err := IsDirEmpty(dir)
 		if err != nil {
@@ -27,11 +23,7 @@ func TestIsDirEmpty(t *testing.T) {
 	})
 
 	t.Run("non-empty directory", func(t *testing.T) {
-		dir, err := os.MkdirTemp("", "test")
-		if err != nil {
-			t.Fatalf("failed to create temp dir: %v", err)
-		}
-		defer os.RemoveAll(dir)
+		dir := t.TempDir()
 
 		file, err := os.CreateTemp(dir, "test")
 		if err != nil {

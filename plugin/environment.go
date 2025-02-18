@@ -49,7 +49,7 @@ func environmentFlags(category string) []cli.Flag {
 }
 
 func EnvironmentFromContext(ctx *cli.Context) (Environment, error) {
-	env, ok := ctx.Generic("env").(*types.StringMapFlag)
+	env, ok := ctx.Generic("environment").(*types.StringMapFlag)
 	if !ok {
 		return nil, fmt.Errorf("%w: failed to read plugin environment", ErrTypeAssertionFailed)
 	}

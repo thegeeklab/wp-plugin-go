@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.3.1
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/joho/godotenv v1.5.1
-	github.com/rs/zerolog v1.33.0
+	github.com/rs/zerolog v1.34.0
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.6
 	golang.org/x/net v0.37.0

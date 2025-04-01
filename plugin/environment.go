@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/thegeeklab/wp-plugin-go/v4/types"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var ErrTypeAssertionFailed = errors.New("type assertion failed")

@@ -25,7 +25,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	plugin_trace "github.com/thegeeklab/wp-plugin-go/v4/trace"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"golang.org/x/net/proxy"
 )
 

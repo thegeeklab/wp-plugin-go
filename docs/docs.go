@@ -11,7 +11,7 @@ import (
 
 	plugin_template "github.com/thegeeklab/wp-plugin-go/v4/template"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type PluginArg struct {

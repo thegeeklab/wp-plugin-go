@@ -17,7 +17,7 @@ package plugin
 import (
 	"strings"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type (

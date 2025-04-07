@@ -32,37 +32,37 @@ func systemFlags(category string) []cli.Flag {
 		&cli.StringFlag{
 			Name:     "system.name",
 			Usage:    "system name",
-			EnvVars:  []string{"CI_SYSTEM_NAME"},
+			Sources:  cli.EnvVars("CI_SYSTEM_NAME"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "system.host",
 			Usage:    "system host",
-			EnvVars:  []string{"CI_SYSTEM_HOST"},
+			Sources:  cli.EnvVars("CI_SYSTEM_HOST"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "system.url",
 			Usage:    "system url",
-			EnvVars:  []string{"CI_SYSTEM_URL"},
+			Sources:  cli.EnvVars("CI_SYSTEM_URL"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "system.arch",
 			Usage:    "system arch",
-			EnvVars:  []string{"CI_SYSTEM_PLATFORM"},
+			Sources:  cli.EnvVars("CI_SYSTEM_PLATFORM"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "system.version",
 			Usage:    "system version",
-			EnvVars:  []string{"CI_SYSTEM_VERSION"},
+			Sources:  cli.EnvVars("CI_SYSTEM_VERSION"),
 			Category: category,
 		},
 	}
 }
 
-func systemFromContext(ctx *cli.Context) System {
+func systemFromContext(ctx *cli.Command) System {
 	return System{
 		Name:     ctx.String("system.name"),
 		Host:     ctx.String("system.host"),

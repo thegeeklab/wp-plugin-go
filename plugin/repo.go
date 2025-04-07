@@ -35,55 +35,55 @@ func repositoryFlags(category string) []cli.Flag {
 		&cli.StringFlag{
 			Name:     "repo.slug",
 			Usage:    "repo slug",
-			EnvVars:  []string{"CI_REPO"},
+			Sources:  cli.EnvVars("CI_REPO"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "repo.name",
 			Usage:    "repo name",
-			EnvVars:  []string{"CI_REPO_NAME"},
+			Sources:  cli.EnvVars("CI_REPO_NAME"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "repo.owner",
 			Usage:    "repo owner",
-			EnvVars:  []string{"CI_REPO_OWNER"},
+			Sources:  cli.EnvVars("CI_REPO_OWNER"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "repo.url",
 			Usage:    "repo url",
-			EnvVars:  []string{"CI_REPO_URL"},
+			Sources:  cli.EnvVars("CI_REPO_URL"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "repo.clone-url",
 			Usage:    "repo clone url",
-			EnvVars:  []string{"CI_REPO_CLONE_URL"},
+			Sources:  cli.EnvVars("CI_REPO_CLONE_URL"),
 			Category: category,
 		},
 		&cli.BoolFlag{
 			Name:     "repo.private",
 			Usage:    "repo private",
-			EnvVars:  []string{"CI_REPO_PRIVATE"},
+			Sources:  cli.EnvVars("CI_REPO_PRIVATE"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "repo.default-branch",
 			Usage:    "repo default branch",
-			EnvVars:  []string{"CI_REPO_DEFAULT_BRANCH"},
+			Sources:  cli.EnvVars("CI_REPO_DEFAULT_BRANCH"),
 			Category: category,
 		},
-		&cli.Int64Flag{
+		&cli.IntFlag{
 			Name:     "repo.remote-id",
 			Usage:    "repo remote id",
-			EnvVars:  []string{"CI_REPO_REMOTE_ID"},
+			Sources:  cli.EnvVars("CI_REPO_REMOTE_ID"),
 			Category: category,
 		},
 	}
 }
 
-func repositoryFromContext(c *cli.Context) Repository {
+func repositoryFromContext(c *cli.Command) Repository {
 	return Repository{
 		Slug:     c.String("repo.slug"),
 		Name:     c.String("repo.name"),
@@ -92,6 +92,6 @@ func repositoryFromContext(c *cli.Context) Repository {
 		CloneURL: c.String("repo.clone-url"),
 		Private:  c.Bool("repo.private"),
 		Branch:   c.String("repo.default-branch"),
-		RemoteID: c.Int64("repo.remote-id"),
+		RemoteID: c.Int("repo.remote-id"),
 	}
 }

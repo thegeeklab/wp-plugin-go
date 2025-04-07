@@ -10,7 +10,7 @@ func (d *DeepStringMapFlag) String() string {
 	return ""
 }
 
-func (d *DeepStringMapFlag) Get() map[string]map[string]string {
+func (d *DeepStringMapFlag) Get() any {
 	return d.parts
 }
 
@@ -40,7 +40,7 @@ func (s *StringMapFlag) String() string {
 	return ""
 }
 
-func (s *StringMapFlag) Get() map[string]string {
+func (s *StringMapFlag) Get() any {
 	return s.parts
 }
 
@@ -63,7 +63,7 @@ func (m *MapFlag) String() string {
 	return ""
 }
 
-func (m *MapFlag) Get() map[string]string {
+func (m *MapFlag) Get() any {
 	return m.parts
 }
 

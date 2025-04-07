@@ -9,43 +9,43 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func testApp() *cli.App {
-	app := &cli.App{
+func testApp() *cli.Command {
+	app := &cli.Command{
 		Name:        "test",
 		Description: "test description",
 		Flags: []cli.Flag{
-			&cli.Int64Flag{
+			&cli.IntFlag{
 				Name:     "dummy-flag-int",
 				Usage:    "dummy int flag desc",
-				EnvVars:  []string{"PLUGIN_DUMMY_FLAG_INT"},
+				Sources:  cli.EnvVars("PLUGIN_DUMMY_FLAG_INT"),
 				Value:    10,
 				Required: true,
 			},
 			&cli.StringFlag{
 				Name:     "dummy-flag",
 				Usage:    "Dummy flag desc.",
-				EnvVars:  []string{"PLUGIN_DUMMY_FLAG"},
+				Sources:  cli.EnvVars("PLUGIN_DUMMY_FLAG"),
 				Value:    "test",
 				Required: true,
 			},
 			&cli.StringFlag{
 				Name:    "simpe-flag",
-				EnvVars: []string{"PLUGIN_X_SIMPLE_FLAG"},
+				Sources: cli.EnvVars("PLUGIN_X_SIMPLE_FLAG"),
 			},
 			&cli.StringFlag{
 				Name:    "other.flag",
 				Usage:   "other flag with desc",
-				EnvVars: []string{"PLUGIN_Z_OTHER_FLAG"},
+				Sources: cli.EnvVars("PLUGIN_Z_OTHER_FLAG"),
 			},
 			&cli.StringSliceFlag{
 				Name:    "slice.flag",
 				Usage:   "slice flag",
-				EnvVars: []string{"PLUGIN_SLICE_FLAG"},
+				Sources: cli.EnvVars("PLUGIN_SLICE_FLAG"),
 			},
 			&cli.StringFlag{
 				Name:    "hidden.flag",
 				Usage:   "hidden flag",
-				EnvVars: []string{"HIDDEN_FLAG", "PLUGIN_HIDDEN_FLAG"},
+				Sources: cli.EnvVars("HIDDEN_FLAG", "PLUGIN_HIDDEN_FLAG"),
 			},
 		},
 	}
@@ -69,7 +69,7 @@ func testFileContent(t *testing.T, file string) string {
 func TestToMarkdownFull(t *testing.T) {
 	tests := []struct {
 		name string
-		app  *cli.App
+		app  *cli.Command
 		want string
 	}{
 		{
@@ -91,13 +91,13 @@ func TestToMarkdownFull(t *testing.T) {
 func TestToData(t *testing.T) {
 	tests := []struct {
 		name string
-		app  *cli.App
+		app  *cli.Command
 		want *CliTemplate
 	}{
 		{
-			"normal branch",
-			testApp(),
-			&CliTemplate{
+			name: "normal branch",
+			app:  testApp(),
+			want: &CliTemplate{
 				Name:        "test",
 				Description: "test description",
 				GlobalArgs: []*PluginArg{

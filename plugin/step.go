@@ -22,7 +22,7 @@ import (
 
 // Step defines runtime metadata for a step.
 type Step struct {
-	Number   int
+	Number   int64
 	Started  time.Time
 	Finished time.Time
 }
@@ -32,28 +32,28 @@ func stepFlags(category string) []cli.Flag {
 		&cli.IntFlag{
 			Name:     "step.number",
 			Usage:    "step number",
-			EnvVars:  []string{"CI_STEP_NUMBER"},
+			Sources:  cli.EnvVars("CI_STEP_NUMBER"),
 			Category: category,
 		},
-		&cli.Int64Flag{
+		&cli.IntFlag{
 			Name:     "step.started",
 			Usage:    "step start time",
-			EnvVars:  []string{"CI_STEP_STARTED"},
+			Sources:  cli.EnvVars("CI_STEP_STARTED"),
 			Category: category,
 		},
-		&cli.Int64Flag{
+		&cli.IntFlag{
 			Name:     "step.finished",
 			Usage:    "step finish time",
-			EnvVars:  []string{"CI_STEP_FINISHED"},
+			Sources:  cli.EnvVars("CI_STEP_FINISHED"),
 			Category: category,
 		},
 	}
 }
 
-func stepFromContext(c *cli.Context) Step {
+func stepFromContext(c *cli.Command) Step {
 	return Step{
 		Number:   c.Int("step.number"),
-		Started:  time.Unix(c.Int64("step.started"), 0),
-		Finished: time.Unix(c.Int64("step.finished"), 0),
+		Started:  time.Unix(c.Int("step.started"), 0),
+		Finished: time.Unix(c.Int("step.finished"), 0),
 	}
 }

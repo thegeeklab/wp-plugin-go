@@ -37,7 +37,7 @@ var templateFs embed.FS
 
 // ToMarkdown creates a markdown string for the `*App`
 // The function errors if either parsing or writing of the string fails.
-func ToMarkdown(app *cli.App) (string, error) {
+func ToMarkdown(app *cli.Command) (string, error) {
 	var w bytes.Buffer
 
 	tpls, err := template.New("cli").Funcs(plugin_template.LoadFuncMap()).ParseFS(templateFs, "**/*.tmpl")
@@ -52,7 +52,7 @@ func ToMarkdown(app *cli.App) (string, error) {
 	return w.String(), nil
 }
 
-func GetTemplateData(app *cli.App) *CliTemplate {
+func GetTemplateData(app *cli.Command) *CliTemplate {
 	return &CliTemplate{
 		Name:        app.Name,
 		Version:     app.Version,
@@ -114,27 +114,41 @@ func parseFlags(flags []cli.Flag) []*PluginArg {
 }
 
 func parseType(raw string) string {
-	reSlice := regexp.MustCompile(`^\*cli\.(.+?)SliceFlag$`)
-	if reSlice.MatchString(raw) {
+	// Check for slice types
+	if strings.Contains(raw, "SliceBase") {
 		return "list"
 	}
 
-	reMap := regexp.MustCompile(`^\*cli\.(.+?)MapFlag$`)
-	if reMap.MatchString(raw) {
+	// Check for map types
+	if strings.Contains(raw, "MapFlag") || strings.Contains(raw, "StringMapFlag") {
 		return "dict"
 	}
 
-	re := regexp.MustCompile(`^\*cli\.(.+?)Flag$`)
+	// Extract the type from the FlagBase generic parameters
+	re := regexp.MustCompile(`\*cli\.FlagBase\[([^,]+),`)
 	match := re.FindStringSubmatch(raw)
 
 	if len(match) > 1 {
-		switch ctype := strings.ToLower(match[1]); ctype {
+		baseType := match[1]
+
+		// Handle array/slice types
+		if strings.HasPrefix(baseType, "[]") {
+			return "list"
+		}
+
+		// Handle map types
+		if strings.HasPrefix(baseType, "map[") {
+			return "dict"
+		}
+
+		// Handle basic types
+		switch baseType {
 		case "int", "int64", "uint", "uint64":
 			return "integer"
 		case "float64":
 			return "float"
 		default:
-			return ctype
+			return strings.ToLower(baseType)
 		}
 	}
 

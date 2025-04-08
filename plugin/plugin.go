@@ -80,7 +80,6 @@ type Options struct {
 type Plugin struct {
 	App     *cli.Command
 	execute ExecuteFunc
-	Context *context.Context
 	// Network options.
 	Network Network
 	// Metadata of the current pipeline.
@@ -135,8 +134,6 @@ func (p *Plugin) action(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-
-	p.Context = &ctx
 
 	if p.Metadata.Pipeline.URL == "" {
 		url, err := url.JoinPath(

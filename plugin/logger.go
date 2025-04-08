@@ -15,11 +15,12 @@
 package plugin
 
 import (
+	"context"
 	"os"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func loggingFlags(category string) []cli.Flag {
@@ -27,7 +28,7 @@ func loggingFlags(category string) []cli.Flag {
 		&cli.StringFlag{
 			Name:     "log-level",
 			Usage:    "plugin log level",
-			EnvVars:  []string{"PLUGIN_LOG_LEVEL"},
+			Sources:  cli.EnvVars("PLUGIN_LOG_LEVEL"),
 			Value:    "info",
 			Category: category,
 		},
@@ -35,11 +36,11 @@ func loggingFlags(category string) []cli.Flag {
 }
 
 // SetupConsoleLogger sets up the console logger.
-func SetupConsoleLogger(c *cli.Context) error {
+func SetupConsoleLogger(ctx context.Context, cmd *cli.Command) (context.Context, error) {
 	level := "info"
 
-	if c != nil {
-		level = c.String("log-level")
+	if cmd != nil {
+		level = cmd.String("log-level")
 	}
 
 	lvl, err := zerolog.ParseLevel(level)
@@ -58,5 +59,5 @@ func SetupConsoleLogger(c *cli.Context) error {
 		log.Info().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
 	}
 
-	return nil
+	return ctx, nil
 }

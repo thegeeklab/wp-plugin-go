@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func Test_currFromContext(t *testing.T) {
@@ -61,13 +61,13 @@ func Test_currFromContext(t *testing.T) {
 
 		t.Run(tt.name, func(t *testing.T) {
 			got := New(options)
-			got.App.Action = func(ctx *cli.Context) error {
-				got.Metadata = MetadataFromContext(ctx)
+			got.App.Action = func(_ context.Context, cmd *cli.Command) error {
+				got.Metadata = MetadataFromContext(cmd)
 
 				return nil
 			}
 
-			_ = got.App.Run([]string{"dummy"})
+			_ = got.App.Run(t.Context(), []string{"dummy"})
 
 			assert.Equal(t, got.Metadata.Curr.Message, tt.want["message"])
 			assert.Equal(t, got.Metadata.Curr.Title, tt.want["title"])

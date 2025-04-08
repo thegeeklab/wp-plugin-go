@@ -15,7 +15,7 @@
 package plugin
 
 import (
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // Metadata defines runtime metadata.
@@ -28,14 +28,14 @@ type Metadata struct {
 	System     System
 }
 
-// MetadataFromContext creates a Metadata from the cli.Context.
-func MetadataFromContext(ctx *cli.Context) Metadata {
+// MetadataFromContext creates a Metadata from the cli.Command.
+func MetadataFromContext(cmd *cli.Command) Metadata {
 	return Metadata{
-		Repository: repositoryFromContext(ctx),
-		Pipeline:   pipelineFromContext(ctx),
-		Curr:       currFromContext(ctx),
-		Prev:       prevFromContext(ctx),
-		Step:       stepFromContext(ctx),
-		System:     systemFromContext(ctx),
+		Repository: repositoryFromContext(cmd),
+		Pipeline:   pipelineFromContext(cmd),
+		Curr:       currFromContext(cmd),
+		Prev:       prevFromContext(cmd),
+		Step:       stepFromContext(cmd),
+		System:     systemFromContext(cmd),
 	}
 }

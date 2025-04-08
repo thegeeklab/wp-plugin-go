@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/thegeeklab/wp-plugin-go/v4/types"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var ErrTypeAssertionFailed = errors.New("type assertion failed")
@@ -41,18 +41,18 @@ func environmentFlags(category string) []cli.Flag {
 		&cli.GenericFlag{
 			Name:     "environment",
 			Usage:    "plugin environment variables",
-			EnvVars:  []string{"PLUGIN_ENVIRONMENT"},
+			Sources:  cli.EnvVars("PLUGIN_ENVIRONMENT"),
 			Value:    &types.StringMapFlag{},
 			Category: category,
 		},
 	}
 }
 
-func EnvironmentFromContext(ctx *cli.Context) (Environment, error) {
-	env, ok := ctx.Generic("environment").(*types.StringMapFlag)
+func EnvironmentFromContext(cmd *cli.Command) (Environment, error) {
+	env, ok := cmd.Value("environment").(map[string]string)
 	if !ok {
 		return nil, fmt.Errorf("%w: failed to read plugin environment", ErrTypeAssertionFailed)
 	}
 
-	return env.Get(), nil
+	return env, nil
 }

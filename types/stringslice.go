@@ -17,7 +17,7 @@ func (s *StringSliceFlag) Set(value string) error {
 	return nil
 }
 
-func (s *StringSliceFlag) Get() []string {
+func (s *StringSliceFlag) Get() any {
 	return s.slice
 }
 

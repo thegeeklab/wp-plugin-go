@@ -25,7 +25,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	plugin_trace "github.com/thegeeklab/wp-plugin-go/v4/trace"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"golang.org/x/net/proxy"
 )
 
@@ -57,30 +57,30 @@ func networkFlags(category string) []cli.Flag {
 		&cli.BoolFlag{
 			Name:     "transport.insecure-skip-verify",
 			Usage:    "skip SSL verification",
-			EnvVars:  []string{"PLUGIN_INSECURE_SKIP_VERIFY"},
+			Sources:  cli.EnvVars("PLUGIN_INSECURE_SKIP_VERIFY"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:    "transport.socks-proxy",
 			Usage:   "socks proxy address",
-			EnvVars: []string{"SOCKS_PROXY"},
+			Sources: cli.EnvVars("SOCKS_PROXY"),
 			Hidden:  true,
 		},
 		&cli.BoolFlag{
 			Name:    "transport.socks-proxy-off",
 			Usage:   "socks proxy ignored",
-			EnvVars: []string{"SOCKS_PROXY_OFF"},
+			Sources: cli.EnvVars("SOCKS_PROXY_OFF"),
 			Hidden:  true,
 		},
 	}
 }
 
-func NetworkFromContext(ctx *cli.Context) Network {
+func NetworkFromContext(cmd *cli.Command) Network {
 	var (
-		skipVerify     = ctx.Bool("transport.insecure-skip-verify")
+		skipVerify     = cmd.Bool("transport.insecure-skip-verify")
 		defaultContext = context.Background()
-		socks          = ctx.String("transport.socks-proxy")
-		socksoff       = ctx.Bool("transport.socks-proxy-off")
+		socks          = cmd.String("transport.socks-proxy")
+		socksoff       = cmd.Bool("transport.socks-proxy-off")
 	)
 
 	certs, err := x509.SystemCertPool()

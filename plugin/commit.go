@@ -17,7 +17,7 @@ package plugin
 import (
 	"strings"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type (
@@ -27,7 +27,7 @@ type (
 		SHA          string
 		Ref          string
 		Refspec      string
-		PullRequest  int
+		PullRequest  int64
 		SourceBranch string
 		TargetBranch string
 		Branch       string
@@ -51,85 +51,85 @@ func currFlags(category string) []cli.Flag {
 		&cli.StringFlag{
 			Name:     "commit.url",
 			Usage:    "commit URL",
-			EnvVars:  []string{"CI_COMMIT_URL"},
+			Sources:  cli.EnvVars("CI_COMMIT_URL"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "commit.sha",
 			Usage:    "commit SHA",
-			EnvVars:  []string{"CI_COMMIT_SHA"},
+			Sources:  cli.EnvVars("CI_COMMIT_SHA"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "commit.ref",
 			Usage:    "commit ref",
-			EnvVars:  []string{"CI_COMMIT_REF"},
+			Sources:  cli.EnvVars("CI_COMMIT_REF"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "commit.refspec",
 			Usage:    "commit refspec",
-			EnvVars:  []string{"CI_COMMIT_REFSPEC"},
+			Sources:  cli.EnvVars("CI_COMMIT_REFSPEC"),
 			Category: category,
 		},
 		&cli.IntFlag{
 			Name:     "commit.pull-request",
 			Usage:    "commit pull request",
-			EnvVars:  []string{"CI_COMMIT_PULL_REQUEST"},
+			Sources:  cli.EnvVars("CI_COMMIT_PULL_REQUEST"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "commit.source-branch",
 			Usage:    "commit source branch",
-			EnvVars:  []string{"CI_COMMIT_SOURCE_BRANCH"},
+			Sources:  cli.EnvVars("CI_COMMIT_SOURCE_BRANCH"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "commit.target-branch",
 			Usage:    "commit target branch",
-			EnvVars:  []string{"CI_COMMIT_TARGET_BRANCH"},
+			Sources:  cli.EnvVars("CI_COMMIT_TARGET_BRANCH"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "commit.branch",
 			Usage:    "commit branch",
-			EnvVars:  []string{"CI_COMMIT_BRANCH"},
+			Sources:  cli.EnvVars("CI_COMMIT_BRANCH"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "commit.tag",
 			Usage:    "commit tag",
-			EnvVars:  []string{"CI_COMMIT_TAG"},
+			Sources:  cli.EnvVars("CI_COMMIT_TAG"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "commit.message",
 			Usage:    "commit message",
-			EnvVars:  []string{"CI_COMMIT_MESSAGE"},
+			Sources:  cli.EnvVars("CI_COMMIT_MESSAGE"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "commit.author.name",
 			Usage:    "commit author name",
-			EnvVars:  []string{"CI_COMMIT_AUTHOR"},
+			Sources:  cli.EnvVars("CI_COMMIT_AUTHOR"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "commit.author.email",
 			Usage:    "commit author email",
-			EnvVars:  []string{"CI_COMMIT_AUTHOR_EMAIL"},
+			Sources:  cli.EnvVars("CI_COMMIT_AUTHOR_EMAIL"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "commit.author.avatar",
 			Usage:    "commit author avatar",
-			EnvVars:  []string{"CI_COMMIT_AUTHOR_AVATAR"},
+			Sources:  cli.EnvVars("CI_COMMIT_AUTHOR_AVATAR"),
 			Category: category,
 		},
 	}
 }
 
-func currFromContext(c *cli.Context) Commit {
+func currFromContext(c *cli.Command) Commit {
 	commitTitle, commitDesc := splitMessage(c.String("commit.message"))
 
 	return Commit{
@@ -158,61 +158,61 @@ func prevFlags(category string) []cli.Flag {
 		&cli.StringFlag{
 			Name:     "prev.commit.url",
 			Usage:    "previous commit URL",
-			EnvVars:  []string{"CI_PREV_COMMIT_URL"},
+			Sources:  cli.EnvVars("CI_PREV_COMMIT_URL"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "prev.commit.sha",
 			Usage:    "previous commit SHA",
-			EnvVars:  []string{"CI_PREV_COMMIT_SHA"},
+			Sources:  cli.EnvVars("CI_PREV_COMMIT_SHA"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "prev.commit.ref",
 			Usage:    "previous commit ref",
-			EnvVars:  []string{"CI_PREV_COMMIT_REF"},
+			Sources:  cli.EnvVars("CI_PREV_COMMIT_REF"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "prev.commit.refspec",
 			Usage:    "previous commit refspec",
-			EnvVars:  []string{"CI_PREV_COMMIT_REFSPEC"},
+			Sources:  cli.EnvVars("CI_PREV_COMMIT_REFSPEC"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "prev.commit.branch",
 			Usage:    "previous commit branch",
-			EnvVars:  []string{"CI_PREV_COMMIT_BRANCH"},
+			Sources:  cli.EnvVars("CI_PREV_COMMIT_BRANCH"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "prev.commit.message",
 			Usage:    "previous commit message",
-			EnvVars:  []string{"CI_PREV_COMMIT_MESSAGE"},
+			Sources:  cli.EnvVars("CI_PREV_COMMIT_MESSAGE"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "prev.commit.author.name",
 			Usage:    "previous commit author name",
-			EnvVars:  []string{"CI_PREV_COMMIT_AUTHOR"},
+			Sources:  cli.EnvVars("CI_PREV_COMMIT_AUTHOR"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "prev.commit.author.email",
 			Usage:    "previous commit author email",
-			EnvVars:  []string{"CI_PREV_COMMIT_AUTHOR_EMAIL"},
+			Sources:  cli.EnvVars("CI_PREV_COMMIT_AUTHOR_EMAIL"),
 			Category: category,
 		},
 		&cli.StringFlag{
 			Name:     "prev.commit.author.avatar",
 			Usage:    "previous commit author avatar",
-			EnvVars:  []string{"CI_PREV_COMMIT_AUTHOR_AVATAR"},
+			Sources:  cli.EnvVars("CI_PREV_COMMIT_AUTHOR_AVATAR"),
 			Category: category,
 		},
 	}
 }
 
-func prevFromContext(c *cli.Context) Commit {
+func prevFromContext(c *cli.Command) Commit {
 	commitTitle, commitDesc := splitMessage(c.String("commit.message"))
 
 	return Commit{

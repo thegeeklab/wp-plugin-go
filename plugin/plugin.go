@@ -24,7 +24,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 //nolint:lll
@@ -78,9 +78,8 @@ type Options struct {
 
 // Plugin defines the plugin instance.
 type Plugin struct {
-	App     *cli.App
+	App     *cli.Command
 	execute ExecuteFunc
-	Context *cli.Context
 	// Network options.
 	Network Network
 	// Metadata of the current pipeline.
@@ -97,9 +96,9 @@ func New(opt Options) *Plugin {
 		_ = godotenv.Overload("/run/woodpecker/env")
 	}
 
-	_ = SetupConsoleLogger(nil)
+	_, _ = SetupConsoleLogger(context.Background(), nil)
 
-	app := &cli.App{
+	app := &cli.Command{
 		Name:    opt.Name,
 		Usage:   opt.Description,
 		Version: opt.Version,
@@ -108,11 +107,11 @@ func New(opt Options) *Plugin {
 	}
 
 	if opt.HideWoodpeckerFlags {
-		app.CustomAppHelpTemplate = appHelpTemplate
+		app.CustomRootCommandHelpTemplate = appHelpTemplate
 	}
 
-	cli.VersionPrinter = func(c *cli.Context) {
-		version := fmt.Sprintf("%s version=%s %s\n", c.App.Name, c.App.Version, opt.VersionMetadata)
+	cli.VersionPrinter = func(cmd *cli.Command) {
+		version := fmt.Sprintf("%s version=%s %s\n", cmd.Name, cmd.Version, opt.VersionMetadata)
 		fmt.Println(strings.TrimSpace(version))
 	}
 
@@ -125,18 +124,16 @@ func New(opt Options) *Plugin {
 	return plugin
 }
 
-func (p *Plugin) action(ctx *cli.Context) error {
+func (p *Plugin) action(ctx context.Context, cmd *cli.Command) error {
 	var err error
 
-	p.Metadata = MetadataFromContext(ctx)
-	p.Network = NetworkFromContext(ctx)
+	p.Metadata = MetadataFromContext(cmd)
+	p.Network = NetworkFromContext(cmd)
 
-	p.Environment, err = EnvironmentFromContext(ctx)
+	p.Environment, err = EnvironmentFromContext(cmd)
 	if err != nil {
 		return err
 	}
-
-	p.Context = ctx
 
 	if p.Metadata.Pipeline.URL == "" {
 		url, err := url.JoinPath(
@@ -155,12 +152,12 @@ func (p *Plugin) action(ctx *cli.Context) error {
 		panic("plugin execute function is not set")
 	}
 
-	return p.execute(ctx.Context)
+	return p.execute(ctx)
 }
 
 // Run the plugin.
 func (p *Plugin) Run() {
-	if err := p.App.Run(os.Args); err != nil {
+	if err := p.App.Run(context.Background(), os.Args); err != nil {
 		log.Error().Err(err).Msg("execution failed")
 		os.Exit(1)
 	}

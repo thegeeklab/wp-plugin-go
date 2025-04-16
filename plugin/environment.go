@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/thegeeklab/wp-plugin-go/v4/types"
+	"github.com/thegeeklab/wp-plugin-go/v5/types"
 	"github.com/urfave/cli/v3"
 )
 

@@ -38,11 +38,10 @@ func (e Environment) Value() []string {
 
 func environmentFlags(category string) []cli.Flag {
 	return []cli.Flag{
-		&cli.GenericFlag{
+		&types.StringMapFlag{
 			Name:     "environment",
 			Usage:    "plugin environment variables",
 			Sources:  cli.EnvVars("PLUGIN_ENVIRONMENT"),
-			Value:    &types.StringMapFlag{},
 			Category: category,
 		},
 	}

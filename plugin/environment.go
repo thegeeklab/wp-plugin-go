@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/thegeeklab/wp-plugin-go/v5/types"
+	plugin_cli "github.com/thegeeklab/wp-plugin-go/v5/cli"
 	"github.com/urfave/cli/v3"
 )
 
@@ -38,7 +38,7 @@ func (e Environment) Value() []string {
 
 func environmentFlags(category string) []cli.Flag {
 	return []cli.Flag{
-		&types.StringMapFlag{
+		&plugin_cli.StringMapFlag{
 			Name:     "environment",
 			Usage:    "plugin environment variables",
 			Sources:  cli.EnvVars("PLUGIN_ENVIRONMENT"),

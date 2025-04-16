@@ -1,4 +1,4 @@
-package types
+package cli
 
 import (
 	"encoding/json"
@@ -7,67 +7,54 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMapSet(t *testing.T) {
+func TestStringMapSet(t *testing.T) {
 	tests := []struct {
-		name    string
-		got     string
-		want    map[string]string
-		wantErr error
+		name string
+		got  string
+		want map[string]string
 	}{
 		{
-			name:    "empty string",
-			got:     "",
-			want:    map[string]string{},
-			wantErr: nil,
+			name: "empty string",
+			got:  "",
+			want: map[string]string{},
 		},
 		{
-			name:    "valid JSON",
-			got:     `{"key1":"value1","key2":"value2"}`,
-			want:    map[string]string{"key1": "value1", "key2": "value2"},
-			wantErr: nil,
+			name: "valid JSON",
+			got:  `{"key1":"value1","key2":"value2"}`,
+			want: map[string]string{"key1": "value1", "key2": "value2"},
 		},
 		{
-			name:    "single key-value",
-			got:     `{"key":"value"}`,
-			want:    map[string]string{"key": "value"},
-			wantErr: nil,
+			name: "single key-value",
+			got:  `{"key":"value"}`,
+			want: map[string]string{"key": "value"},
 		},
 		{
-			name:    "empty JSON object",
-			got:     "{}",
-			want:    map[string]string{},
-			wantErr: nil,
+			name: "non-JSON string",
+			got:  "not-json",
+			want: map[string]string{"*": "not-json"},
 		},
 		{
-			name:    "invalid JSON",
-			got:     "not-json",
-			want:    map[string]string{},
-			wantErr: &json.SyntaxError{},
+			name: "empty JSON object",
+			got:  "{}",
+			want: map[string]string{},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var dest map[string]string
-			m := &Map{
+			s := &StringMap{
 				destination: &dest,
 			}
 
-			err := m.Set(tt.got)
-
-			if tt.wantErr != nil {
-				assert.ErrorAs(t, err, &tt.wantErr)
-
-				return
-			}
-
+			err := s.Set(tt.got)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, dest)
 		})
 	}
 }
 
-func TestMapString(t *testing.T) {
+func TestStringMapString(t *testing.T) {
 	tests := []struct {
 		name string
 		got  map[string]string
@@ -97,11 +84,11 @@ func TestMapString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := &Map{
+			s := &StringMap{
 				destination: &tt.got,
 			}
 
-			result := m.String()
+			result := s.String()
 
 			if len(tt.got) > 1 {
 				var expected, actual map[string]string
@@ -117,7 +104,7 @@ func TestMapString(t *testing.T) {
 	}
 }
 
-func TestMapGet(t *testing.T) {
+func TestStringMapGet(t *testing.T) {
 	tests := []struct {
 		name string
 		got  map[string]string
@@ -138,17 +125,17 @@ func TestMapGet(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := &Map{
+			s := &StringMap{
 				destination: &tt.got,
 			}
 
-			result := m.Get()
+			result := s.Get()
 			assert.Equal(t, tt.got, result)
 		})
 	}
 }
 
-func TestMapCreate(t *testing.T) {
+func TestStringMapCreate(t *testing.T) {
 	tests := []struct {
 		name string
 		got  map[string]string
@@ -171,18 +158,18 @@ func TestMapCreate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var dest map[string]string
 
-			m := Map{}
-			config := MapConfig{}
+			s := StringMap{}
+			config := StringMapConfig{}
 
-			value := m.Create(tt.got, &dest, config)
+			value := s.Create(tt.got, &dest, config)
 			assert.Equal(t, tt.got, dest)
-			assert.Equal(t, &dest, value.(*Map).destination)
+			assert.Equal(t, &dest, value.(*StringMap).destination)
 		})
 	}
 }
 
 //nolint:dupl
-func TestMapToString(t *testing.T) {
+func TestStringMapToString(t *testing.T) {
 	tests := []struct {
 		name string
 		got  map[string]string
@@ -207,9 +194,9 @@ func TestMapToString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := Map{}
+			s := StringMap{}
 
-			result := m.ToString(tt.got)
+			result := s.ToString(tt.got)
 
 			if len(tt.got) > 1 {
 				var expected, actual map[string]string

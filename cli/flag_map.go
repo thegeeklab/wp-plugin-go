@@ -22,8 +22,8 @@ type Map struct {
 }
 
 // Create implements the ValueCreator interface.
-func (m Map) Create(val map[string]string, p *map[string]string, _ MapConfig) cli.Value {
-	*p = val
+func (m Map) Create(v map[string]string, p *map[string]string, _ MapConfig) cli.Value {
+	*p = v
 
 	return &Map{
 		destination: p,
@@ -31,12 +31,12 @@ func (m Map) Create(val map[string]string, p *map[string]string, _ MapConfig) cl
 }
 
 // ToString implements the ValueCreator interface.
-func (m Map) ToString(val map[string]string) string {
-	if len(val) == 0 {
+func (m Map) ToString(v map[string]string) string {
+	if len(v) == 0 {
 		return ""
 	}
 
-	jsonBytes, err := json.Marshal(val)
+	jsonBytes, err := json.Marshal(v)
 	if err != nil {
 		return ""
 	}
@@ -45,14 +45,14 @@ func (m Map) ToString(val map[string]string) string {
 }
 
 // Set implements the flag.Value interface.
-func (m *Map) Set(value string) error {
-	if value == "" {
+func (m *Map) Set(v string) error {
+	if v == "" {
 		*m.destination = map[string]string{}
 
 		return nil
 	}
 
-	return json.Unmarshal([]byte(value), m.destination)
+	return json.Unmarshal([]byte(v), m.destination)
 }
 
 // Get implements the flag.Value interface.

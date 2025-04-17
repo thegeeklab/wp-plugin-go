@@ -22,8 +22,8 @@ type StringMap struct {
 }
 
 // Create implements the ValueCreator interface.
-func (s StringMap) Create(val map[string]string, p *map[string]string, _ StringMapConfig) cli.Value {
-	*p = val
+func (s StringMap) Create(v map[string]string, p *map[string]string, _ StringMapConfig) cli.Value {
+	*p = v
 
 	return &StringMap{
 		destination: p,
@@ -31,12 +31,12 @@ func (s StringMap) Create(val map[string]string, p *map[string]string, _ StringM
 }
 
 // ToString implements the ValueCreator interface.
-func (s StringMap) ToString(val map[string]string) string {
-	if len(val) == 0 {
+func (s StringMap) ToString(v map[string]string) string {
+	if len(v) == 0 {
 		return ""
 	}
 
-	jsonBytes, err := json.Marshal(val)
+	jsonBytes, err := json.Marshal(v)
 	if err != nil {
 		return ""
 	}
@@ -45,14 +45,14 @@ func (s StringMap) ToString(val map[string]string) string {
 }
 
 // Set implements the flag.Value interface.
-func (s *StringMap) Set(value string) error {
-	if value == "" {
+func (s *StringMap) Set(v string) error {
+	if v == "" {
 		*s.destination = map[string]string{}
 
 		return nil
 	}
 
-	err := json.Unmarshal([]byte(value), s.destination)
+	err := json.Unmarshal([]byte(v), s.destination)
 	if err != nil {
 		// Initialize the map if it's nil
 		if *s.destination == nil {
@@ -60,7 +60,7 @@ func (s *StringMap) Set(value string) error {
 		}
 
 		// For StringMapFlag, we want to handle non-JSON values as a wildcard key
-		(*s.destination)["*"] = value
+		(*s.destination)["*"] = v
 	}
 
 	return nil

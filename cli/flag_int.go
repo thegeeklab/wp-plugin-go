@@ -23,8 +23,8 @@ type Int struct {
 }
 
 // Create implements the ValueCreator interface.
-func (i Int) Create(val int, p *int, _ IntConfig) cli.Value {
-	*p = val
+func (i Int) Create(v int, p *int, _ IntConfig) cli.Value {
+	*p = v
 
 	return &Int{
 		destination: p,
@@ -32,19 +32,19 @@ func (i Int) Create(val int, p *int, _ IntConfig) cli.Value {
 }
 
 // ToString implements the ValueCreator interface.
-func (i Int) ToString(val int) string {
-	return fmt.Sprintf("%d", val)
+func (i Int) ToString(v int) string {
+	return fmt.Sprintf("%d", v)
 }
 
 // Set implements the flag.Value interface.
-func (i *Int) Set(value string) error {
-	if value == "" {
+func (i *Int) Set(v string) error {
+	if v == "" {
 		*i.destination = 0
 
 		return nil
 	}
 
-	val, err := strconv.Atoi(value)
+	val, err := strconv.Atoi(v)
 	if err != nil {
 		return err
 	}

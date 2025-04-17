@@ -14,51 +14,51 @@ type (
 
 // StringConfig defines the configuration for string flags.
 type StringSliceConfig struct {
-	Separator    string
+	Delimiter    string
 	EscapeString string
 }
 
 // StringSlice implements the Value and ValueCreator interfaces for string slices.
 type StringSlice struct {
 	destination  *[]string
-	separator    string
+	delimiter    string
 	escapeString string
 }
 
 // Create implements the ValueCreator interface.
-func (s StringSlice) Create(val []string, p *[]string, c StringSliceConfig) cli.Value {
-	*p = val
+func (s StringSlice) Create(v []string, p *[]string, c StringSliceConfig) cli.Value {
+	*p = v
 
 	return &StringSlice{
 		destination:  p,
-		separator:    c.Separator,
+		delimiter:    c.Delimiter,
 		escapeString: c.EscapeString,
 	}
 }
 
 // ToString implements the ValueCreator interface.
-func (s StringSlice) ToString(val []string) string {
-	if len(val) == 0 {
+func (s StringSlice) ToString(v []string) string {
+	if len(v) == 0 {
 		return ""
 	}
 
-	return fmt.Sprintf("%q", strings.Join(val, s.separator))
+	return fmt.Sprintf("%q", strings.Join(v, s.delimiter))
 }
 
 // Set implements the flag.Value interface.
-func (s *StringSlice) Set(value string) error {
-	if value == "" {
+func (s *StringSlice) Set(v string) error {
+	if v == "" {
 		*s.destination = []string{}
 
 		return nil
 	}
 
-	out := strings.Split(value, s.separator)
+	out := strings.Split(v, s.delimiter)
 
 	//nolint:mnd
 	for i := len(out) - 2; i >= 0; i-- {
 		if strings.HasSuffix(out[i], s.escapeString) {
-			out[i] = out[i][:len(out[i])-len(s.escapeString)] + s.separator + out[i+1]
+			out[i] = out[i][:len(out[i])-len(s.escapeString)] + s.delimiter + out[i+1]
 			out = append(out[:i+1], out[i+2:]...)
 		}
 	}
@@ -79,5 +79,5 @@ func (s *StringSlice) String() string {
 		return ""
 	}
 
-	return strings.Join(*s.destination, s.separator)
+	return strings.Join(*s.destination, s.delimiter)
 }

@@ -23,11 +23,11 @@ type DeepStringMap struct {
 
 // Create implements the ValueCreator interface.
 func (d DeepStringMap) Create(
-	val map[string]map[string]string,
+	v map[string]map[string]string,
 	p *map[string]map[string]string,
 	_ DeepStringMapConfig,
 ) cli.Value {
-	*p = val
+	*p = v
 
 	return &DeepStringMap{
 		destination: p,
@@ -35,12 +35,12 @@ func (d DeepStringMap) Create(
 }
 
 // ToString implements the ValueCreator interface.
-func (d DeepStringMap) ToString(val map[string]map[string]string) string {
-	if len(val) == 0 {
+func (d DeepStringMap) ToString(v map[string]map[string]string) string {
+	if len(v) == 0 {
 		return ""
 	}
 
-	jsonBytes, err := json.Marshal(val)
+	jsonBytes, err := json.Marshal(v)
 	if err != nil {
 		return ""
 	}
@@ -49,19 +49,19 @@ func (d DeepStringMap) ToString(val map[string]map[string]string) string {
 }
 
 // Set implements the flag.Value interface.
-func (d *DeepStringMap) Set(value string) error {
-	if value == "" {
+func (d *DeepStringMap) Set(v string) error {
+	if v == "" {
 		*d.destination = map[string]map[string]string{}
 
 		return nil
 	}
 
-	err := json.Unmarshal([]byte(value), d.destination)
+	err := json.Unmarshal([]byte(v), d.destination)
 	if err != nil {
 		// Try to parse as a single-level map
 		single := map[string]string{}
 
-		err := json.Unmarshal([]byte(value), &single)
+		err := json.Unmarshal([]byte(v), &single)
 		if err != nil {
 			return err
 		}

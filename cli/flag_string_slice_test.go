@@ -44,7 +44,7 @@ func TestStringSliceSet(t *testing.T) {
 			var dest []string
 			s := &StringSlice{
 				destination:  &dest,
-				separator:    ",",
+				delimiter:    ",",
 				escapeString: "\\",
 			}
 
@@ -92,7 +92,7 @@ func TestStringSliceString(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &StringSlice{
 				destination:  &tt.got,
-				separator:    ",",
+				delimiter:    ",",
 				escapeString: "\\",
 			}
 
@@ -124,7 +124,7 @@ func TestStringSliceGet(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &StringSlice{
 				destination:  &tt.got,
-				separator:    ",",
+				delimiter:    ",",
 				escapeString: "\\",
 			}
 
@@ -144,7 +144,7 @@ func TestStringSliceCreate(t *testing.T) {
 			name: "default config",
 			got:  []string{"a", "b"},
 			config: StringSliceConfig{
-				Separator:    ",",
+				Delimiter:    ",",
 				EscapeString: "\\",
 			},
 		},
@@ -152,7 +152,7 @@ func TestStringSliceCreate(t *testing.T) {
 			name: "custom config",
 			got:  []string{"a", "b"},
 			config: StringSliceConfig{
-				Separator:    ";",
+				Delimiter:    ";",
 				EscapeString: "#",
 			},
 		},
@@ -173,7 +173,7 @@ func TestStringSliceCreate(t *testing.T) {
 			stringSlice, ok := value.(*StringSlice)
 			assert.True(t, ok)
 			assert.Equal(t, &dest, stringSlice.destination)
-			assert.Equal(t, tt.config.Separator, stringSlice.separator)
+			assert.Equal(t, tt.config.Delimiter, stringSlice.delimiter)
 			assert.Equal(t, tt.config.EscapeString, stringSlice.escapeString)
 		})
 	}
@@ -183,38 +183,38 @@ func TestStringSliceToString(t *testing.T) {
 	tests := []struct {
 		name      string
 		got       []string
-		separator string
+		delimiter string
 		want      string
 	}{
 		{
 			name:      "empty slice",
 			got:       []string{},
-			separator: ",",
+			delimiter: ",",
 			want:      "",
 		},
 		{
 			name:      "single item",
 			got:       []string{"a"},
-			separator: ",",
+			delimiter: ",",
 			want:      `"a"`,
 		},
 		{
 			name:      "multiple items",
 			got:       []string{"a", "b", "c"},
-			separator: ",",
+			delimiter: ",",
 			want:      `"a,b,c"`,
 		},
 		{
-			name:      "custom separator",
+			name:      "custom delimiter",
 			got:       []string{"a", "b", "c"},
-			separator: ";",
+			delimiter: ";",
 			want:      `"a;b;c"`,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := StringSlice{separator: tt.separator}
+			s := StringSlice{delimiter: tt.delimiter}
 
 			result := s.ToString(tt.got)
 			assert.Equal(t, tt.want, result)

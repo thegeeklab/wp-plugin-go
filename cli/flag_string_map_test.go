@@ -88,18 +88,18 @@ func TestStringMapString(t *testing.T) {
 				destination: &tt.input,
 			}
 
-			result := s.String()
+			got := s.String()
 
 			if len(tt.input) > 1 {
 				var expected, actual map[string]string
 				_ = json.Unmarshal([]byte(tt.want), &expected)
-				_ = json.Unmarshal([]byte(result), &actual)
+				_ = json.Unmarshal([]byte(got), &actual)
 				assert.EqualValues(t, expected, actual)
 
 				return
 			}
 
-			assert.Equal(t, tt.want, result)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

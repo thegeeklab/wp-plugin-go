@@ -88,18 +88,18 @@ func TestDeepStringMapString(t *testing.T) {
 				destination: &tt.input,
 			}
 
-			result := d.String()
+			got := d.String()
 
 			if len(tt.input) > 1 {
-				var got, actual map[string]map[string]string
-				_ = json.Unmarshal([]byte(tt.want), &got)
-				_ = json.Unmarshal([]byte(result), &actual)
-				assert.EqualValues(t, got, actual)
+				var expected, actual map[string]map[string]string
+				_ = json.Unmarshal([]byte(tt.want), &expected)
+				_ = json.Unmarshal([]byte(got), &actual)
+				assert.EqualValues(t, expected, actual)
 
 				return
 			}
 
-			assert.Equal(t, tt.want, result)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

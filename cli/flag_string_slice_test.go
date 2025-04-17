@@ -8,90 +8,90 @@ import (
 
 func TestStringSliceSet(t *testing.T) {
 	tests := []struct {
-		name string
-		got  string
-		want []string
+		name  string
+		input string
+		want  []string
 	}{
 		{
-			name: "empty string",
-			got:  "",
-			want: []string{},
+			name:  "empty string",
+			input: "",
+			want:  []string{},
 		},
 		{
-			name: "simple comma separated",
-			got:  "a,b",
-			want: []string{"a", "b"},
+			name:  "simple comma separated",
+			input: "a,b",
+			want:  []string{"a", "b"},
 		},
 		{
-			name: "multiple commas",
-			got:  ",,,",
-			want: []string{"", "", "", ""},
+			name:  "multiple commas",
+			input: ",,,",
+			want:  []string{"", "", "", ""},
 		},
 		{
-			name: "escaped comma",
-			got:  ",a\\,",
-			want: []string{"", "a,"},
+			name:  "escaped comma",
+			input: ",a\\,",
+			want:  []string{"", "a,"},
 		},
 		{
-			name: "escaped backslash",
-			got:  "a,b\\,c\\\\d,e",
-			want: []string{"a", "b,c\\\\d", "e"},
+			name:  "escaped backslash",
+			input: "a,b\\,c\\\\d,e",
+			want:  []string{"a", "b,c\\\\d", "e"},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var dest []string
+			var got []string
 			s := &StringSlice{
-				destination:  &dest,
+				destination:  &got,
 				delimiter:    ",",
 				escapeString: "\\",
 			}
 
-			err := s.Set(tt.got)
+			err := s.Set(tt.input)
 			assert.NoError(t, err)
-			assert.Equal(t, tt.want, dest)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
 
 func TestStringSliceString(t *testing.T) {
 	tests := []struct {
-		name string
-		got  []string
-		want string
+		name  string
+		input []string
+		want  string
 	}{
 		{
-			name: "empty slice",
-			got:  []string{},
-			want: "",
+			name:  "empty slice",
+			input: []string{},
+			want:  "",
 		},
 		{
-			name: "nil slice",
-			got:  nil,
-			want: "",
+			name:  "nil slice",
+			input: nil,
+			want:  "",
 		},
 		{
-			name: "single item",
-			got:  []string{"a"},
-			want: "a",
+			name:  "single item",
+			input: []string{"a"},
+			want:  "a",
 		},
 		{
-			name: "multiple items",
-			got:  []string{"a", "b", "c"},
-			want: "a,b,c",
+			name:  "multiple items",
+			input: []string{"a", "b", "c"},
+			want:  "a,b,c",
 		},
 		{
-			name: "items with commas",
-			got:  []string{"a,b", "c"},
-			want: "a,b,c",
+			name:  "items with commas",
+			input: []string{"a,b", "c"},
+			want:  "a,b,c",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &StringSlice{
-				destination:  &tt.got,
+				destination:  &tt.input,
 				delimiter:    ",",
 				escapeString: "\\",
 			}
@@ -104,32 +104,32 @@ func TestStringSliceString(t *testing.T) {
 func TestStringSliceGet(t *testing.T) {
 	tests := []struct {
 		name string
-		got  []string
+		want []string
 	}{
 		{
 			name: "empty slice",
-			got:  []string{},
+			want: []string{},
 		},
 		{
 			name: "single item",
-			got:  []string{"a"},
+			want: []string{"a"},
 		},
 		{
 			name: "multiple items",
-			got:  []string{"a", "b", "c"},
+			want: []string{"a", "b", "c"},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &StringSlice{
-				destination:  &tt.got,
+				destination:  &tt.want,
 				delimiter:    ",",
 				escapeString: "\\",
 			}
 
 			result := s.Get()
-			assert.Equal(t, tt.got, result)
+			assert.Equal(t, tt.want, result)
 		})
 	}
 }
@@ -137,20 +137,28 @@ func TestStringSliceGet(t *testing.T) {
 func TestStringSliceCreate(t *testing.T) {
 	tests := []struct {
 		name   string
-		got    []string
+		input  []string
+		want   []string
 		config StringSliceConfig
 	}{
 		{
-			name: "default config",
-			got:  []string{"a", "b"},
+			name:  "empty slice",
+			input: nil,
+			want:  []string{},
+		},
+		{
+			name:  "default config",
+			input: []string{"a", "b"},
+			want:  []string{"a", "b"},
 			config: StringSliceConfig{
 				Delimiter:    ",",
 				EscapeString: "\\",
 			},
 		},
 		{
-			name: "custom config",
-			got:  []string{"a", "b"},
+			name:  "custom config",
+			input: []string{"a", "b"},
+			want:  []string{"a", "b"},
 			config: StringSliceConfig{
 				Delimiter:    ";",
 				EscapeString: "#",
@@ -163,18 +171,12 @@ func TestStringSliceCreate(t *testing.T) {
 			var dest []string
 
 			s := StringSlice{}
+			got := s.Create(tt.input, &dest, tt.config)
 
-			value := s.Create(tt.got, &dest, tt.config)
-
-			// Check that destination was set
-			assert.Equal(t, tt.got, dest)
-
-			// Check that returned value has correct properties
-			stringSlice, ok := value.(*StringSlice)
-			assert.True(t, ok)
-			assert.Equal(t, &dest, stringSlice.destination)
-			assert.Equal(t, tt.config.Delimiter, stringSlice.delimiter)
-			assert.Equal(t, tt.config.EscapeString, stringSlice.escapeString)
+			assert.Equal(t, tt.input, dest)
+			assert.Equal(t, &dest, got.(*StringSlice).destination)
+			assert.Equal(t, tt.config.Delimiter, got.(*StringSlice).delimiter)
+			assert.Equal(t, tt.config.EscapeString, got.(*StringSlice).escapeString)
 		})
 	}
 }
@@ -182,31 +184,31 @@ func TestStringSliceCreate(t *testing.T) {
 func TestStringSliceToString(t *testing.T) {
 	tests := []struct {
 		name      string
-		got       []string
+		input     []string
 		delimiter string
 		want      string
 	}{
 		{
 			name:      "empty slice",
-			got:       []string{},
+			input:     []string{},
 			delimiter: ",",
 			want:      "",
 		},
 		{
 			name:      "single item",
-			got:       []string{"a"},
+			input:     []string{"a"},
 			delimiter: ",",
 			want:      `"a"`,
 		},
 		{
 			name:      "multiple items",
-			got:       []string{"a", "b", "c"},
+			input:     []string{"a", "b", "c"},
 			delimiter: ",",
 			want:      `"a,b,c"`,
 		},
 		{
 			name:      "custom delimiter",
-			got:       []string{"a", "b", "c"},
+			input:     []string{"a", "b", "c"},
 			delimiter: ";",
 			want:      `"a;b;c"`,
 		},
@@ -216,8 +218,8 @@ func TestStringSliceToString(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s := StringSlice{delimiter: tt.delimiter}
 
-			result := s.ToString(tt.got)
-			assert.Equal(t, tt.want, result)
+			got := s.ToString(tt.input)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

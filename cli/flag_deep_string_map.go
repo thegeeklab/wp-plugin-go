@@ -27,7 +27,11 @@ func (d DeepStringMap) Create(
 	p *map[string]map[string]string,
 	_ DeepStringMapConfig,
 ) cli.Value {
-	*p = v
+	*p = map[string]map[string]string{}
+
+	if v != nil {
+		*p = v
+	}
 
 	return &DeepStringMap{
 		destination: p,

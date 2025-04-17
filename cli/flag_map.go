@@ -23,7 +23,11 @@ type Map struct {
 
 // Create implements the ValueCreator interface.
 func (m Map) Create(v map[string]string, p *map[string]string, _ MapConfig) cli.Value {
-	*p = v
+	*p = map[string]string{}
+
+	if v != nil {
+		*p = v
+	}
 
 	return &Map{
 		destination: p,

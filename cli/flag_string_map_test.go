@@ -9,34 +9,34 @@ import (
 
 func TestStringMapSet(t *testing.T) {
 	tests := []struct {
-		name string
-		got  string
-		want map[string]string
+		name  string
+		input string
+		want  map[string]string
 	}{
 		{
-			name: "empty string",
-			got:  "",
-			want: map[string]string{},
+			name:  "empty string",
+			input: "",
+			want:  map[string]string{},
 		},
 		{
-			name: "valid JSON",
-			got:  `{"key1":"value1","key2":"value2"}`,
-			want: map[string]string{"key1": "value1", "key2": "value2"},
+			name:  "valid JSON",
+			input: `{"key1":"value1","key2":"value2"}`,
+			want:  map[string]string{"key1": "value1", "key2": "value2"},
 		},
 		{
-			name: "single key-value",
-			got:  `{"key":"value"}`,
-			want: map[string]string{"key": "value"},
+			name:  "single key-value",
+			input: `{"key":"value"}`,
+			want:  map[string]string{"key": "value"},
 		},
 		{
-			name: "non-JSON string",
-			got:  "not-json",
-			want: map[string]string{"*": "not-json"},
+			name:  "non-JSON string",
+			input: "not-json",
+			want:  map[string]string{"*": "not-json"},
 		},
 		{
-			name: "empty JSON object",
-			got:  "{}",
-			want: map[string]string{},
+			name:  "empty JSON object",
+			input: "{}",
+			want:  map[string]string{},
 		},
 	}
 
@@ -47,7 +47,7 @@ func TestStringMapSet(t *testing.T) {
 				destination: &dest,
 			}
 
-			err := s.Set(tt.got)
+			err := s.Set(tt.input)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, dest)
 		})
@@ -56,41 +56,41 @@ func TestStringMapSet(t *testing.T) {
 
 func TestStringMapString(t *testing.T) {
 	tests := []struct {
-		name string
-		got  map[string]string
-		want string
+		name  string
+		input map[string]string
+		want  string
 	}{
 		{
-			name: "empty map",
-			got:  map[string]string{},
-			want: "",
+			name:  "empty map",
+			input: map[string]string{},
+			want:  "",
 		},
 		{
-			name: "nil map",
-			got:  nil,
-			want: "",
+			name:  "nil map",
+			input: nil,
+			want:  "",
 		},
 		{
-			name: "single key-value",
-			got:  map[string]string{"key": "value"},
-			want: `{"key":"value"}`,
+			name:  "single key-value",
+			input: map[string]string{"key": "value"},
+			want:  `{"key":"value"}`,
 		},
 		{
-			name: "multiple key-values",
-			got:  map[string]string{"key1": "value1", "key2": "value2"},
-			want: `{"key1":"value1","key2":"value2"}`,
+			name:  "multiple key-values",
+			input: map[string]string{"key1": "value1", "key2": "value2"},
+			want:  `{"key1":"value1","key2":"value2"}`,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &StringMap{
-				destination: &tt.got,
+				destination: &tt.input,
 			}
 
 			result := s.String()
 
-			if len(tt.got) > 1 {
+			if len(tt.input) > 1 {
 				var expected, actual map[string]string
 				_ = json.Unmarshal([]byte(tt.want), &expected)
 				_ = json.Unmarshal([]byte(result), &actual)
@@ -107,50 +107,59 @@ func TestStringMapString(t *testing.T) {
 func TestStringMapGet(t *testing.T) {
 	tests := []struct {
 		name string
-		got  map[string]string
+		want map[string]string
 	}{
 		{
 			name: "empty map",
-			got:  map[string]string{},
+			want: map[string]string{},
 		},
 		{
 			name: "single key-value",
-			got:  map[string]string{"key": "value"},
+			want: map[string]string{"key": "value"},
 		},
 		{
 			name: "multiple key-values",
-			got:  map[string]string{"key1": "value1", "key2": "value2"},
+			want: map[string]string{"key1": "value1", "key2": "value2"},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &StringMap{
-				destination: &tt.got,
+				destination: &tt.want,
 			}
 
 			result := s.Get()
-			assert.Equal(t, tt.got, result)
+			assert.Equal(t, tt.want, result)
 		})
 	}
 }
 
 func TestStringMapCreate(t *testing.T) {
 	tests := []struct {
-		name string
-		got  map[string]string
+		name  string
+		input map[string]string
+		want  map[string]string
 	}{
 		{
-			name: "empty map",
-			got:  map[string]string{},
+			name:  "empty map",
+			input: nil,
+			want:  map[string]string{},
 		},
 		{
-			name: "single key-value",
-			got:  map[string]string{"key": "value"},
+			name:  "empty map",
+			input: map[string]string{},
+			want:  map[string]string{},
 		},
 		{
-			name: "multiple key-values",
-			got:  map[string]string{"key1": "value1", "key2": "value2"},
+			name:  "single key-value",
+			input: map[string]string{"key": "value"},
+			want:  map[string]string{"key": "value"},
+		},
+		{
+			name:  "multiple key-values",
+			input: map[string]string{"key1": "value1", "key2": "value2"},
+			want:  map[string]string{"key1": "value1", "key2": "value2"},
 		},
 	}
 
@@ -161,34 +170,33 @@ func TestStringMapCreate(t *testing.T) {
 			s := StringMap{}
 			config := StringMapConfig{}
 
-			value := s.Create(tt.got, &dest, config)
-			assert.Equal(t, tt.got, dest)
-			assert.Equal(t, &dest, value.(*StringMap).destination)
+			got := s.Create(tt.input, &dest, config)
+			assert.Equal(t, tt.want, dest)
+			assert.Equal(t, &dest, got.(*StringMap).destination)
 		})
 	}
 }
 
-//nolint:dupl
 func TestStringMapToString(t *testing.T) {
 	tests := []struct {
-		name string
-		got  map[string]string
-		want string
+		name  string
+		input map[string]string
+		want  string
 	}{
 		{
-			name: "empty map",
-			got:  map[string]string{},
-			want: "",
+			name:  "empty map",
+			input: map[string]string{},
+			want:  "",
 		},
 		{
-			name: "single key-value",
-			got:  map[string]string{"key": "value"},
-			want: `{"key":"value"}`,
+			name:  "single key-value",
+			input: map[string]string{"key": "value"},
+			want:  `{"key":"value"}`,
 		},
 		{
-			name: "multiple key-values",
-			got:  map[string]string{"key1": "value1", "key2": "value2"},
-			want: `{"key1":"value1","key2":"value2"}`,
+			name:  "multiple key-values",
+			input: map[string]string{"key1": "value1", "key2": "value2"},
+			want:  `{"key1":"value1","key2":"value2"}`,
 		},
 	}
 
@@ -196,18 +204,18 @@ func TestStringMapToString(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s := StringMap{}
 
-			result := s.ToString(tt.got)
+			got := s.ToString(tt.input)
 
-			if len(tt.got) > 1 {
+			if len(tt.input) > 1 {
 				var expected, actual map[string]string
 				_ = json.Unmarshal([]byte(tt.want), &expected)
-				_ = json.Unmarshal([]byte(result), &actual)
+				_ = json.Unmarshal([]byte(got), &actual)
 				assert.EqualValues(t, expected, actual)
 
 				return
 			}
 
-			assert.Equal(t, tt.want, result)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

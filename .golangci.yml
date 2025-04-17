@@ -94,6 +94,13 @@ linters:
       - third_party$
       - builtin$
       - examples$
+    rules:
+      - path: _test\.go$
+        linters:
+          - forcetypeassert
+      - path: flag_.*\.go$
+        linters:
+          - ireturn
 
 formatters:
   enable:

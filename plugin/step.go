@@ -29,19 +29,19 @@ type Step struct {
 
 func stepFlags(category string) []cli.Flag {
 	return []cli.Flag{
-		&cli.IntFlag{
+		&cli.Int64Flag{
 			Name:     "step.number",
 			Usage:    "step number",
 			Sources:  cli.EnvVars("CI_STEP_NUMBER"),
 			Category: category,
 		},
-		&cli.IntFlag{
+		&cli.Int64Flag{
 			Name:     "step.started",
 			Usage:    "step start time",
 			Sources:  cli.EnvVars("CI_STEP_STARTED"),
 			Category: category,
 		},
-		&cli.IntFlag{
+		&cli.Int64Flag{
 			Name:     "step.finished",
 			Usage:    "step finish time",
 			Sources:  cli.EnvVars("CI_STEP_FINISHED"),
@@ -52,8 +52,8 @@ func stepFlags(category string) []cli.Flag {
 
 func stepFromContext(c *cli.Command) Step {
 	return Step{
-		Number:   c.Int("step.number"),
-		Started:  time.Unix(c.Int("step.started"), 0),
-		Finished: time.Unix(c.Int("step.finished"), 0),
+		Number:   c.Int64("step.number"),
+		Started:  time.Unix(c.Int64("step.started"), 0),
+		Finished: time.Unix(c.Int64("step.finished"), 0),
 	}
 }

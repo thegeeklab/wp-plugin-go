@@ -35,7 +35,7 @@ type Pipeline struct {
 
 func pipelineFlags(category string) []cli.Flag {
 	return []cli.Flag{
-		&cli.IntFlag{
+		&cli.Int64Flag{
 			Name:     "pipeline.number",
 			Usage:    "pipeline number",
 			Sources:  cli.EnvVars("CI_PIPELINE_NUMBER"),
@@ -66,25 +66,25 @@ func pipelineFlags(category string) []cli.Flag {
 			Sources:  cli.EnvVars("CI_PIPELINE_DEPLOY_TARGET"),
 			Category: category,
 		},
-		&cli.IntFlag{
+		&cli.Int64Flag{
 			Name:     "pipeline.created",
 			Usage:    "pipeline creation time",
 			Sources:  cli.EnvVars("CI_PIPELINE_CREATED"),
 			Category: category,
 		},
-		&cli.IntFlag{
+		&cli.Int64Flag{
 			Name:     "pipeline.started",
 			Usage:    "pipeline start time",
 			Sources:  cli.EnvVars("CI_PIPELINE_STARTED"),
 			Category: category,
 		},
-		&cli.IntFlag{
+		&cli.Int64Flag{
 			Name:     "pipeline.finished",
 			Usage:    "pipeline finish time",
 			Sources:  cli.EnvVars("CI_PIPELINE_FINISHED"),
 			Category: category,
 		},
-		&cli.IntFlag{
+		&cli.Int64Flag{
 			Name:     "pipeline.parent",
 			Usage:    "pipeline parent",
 			Sources:  cli.EnvVars("CI_PIPELINE_PARENT"),
@@ -95,14 +95,14 @@ func pipelineFlags(category string) []cli.Flag {
 
 func pipelineFromContext(c *cli.Command) Pipeline {
 	return Pipeline{
-		Number:       c.Int("pipeline.number"),
+		Number:       c.Int64("pipeline.number"),
 		Status:       c.String("pipeline.status"),
 		Event:        c.String("pipeline.event"),
 		URL:          c.String("pipeline.url"),
 		DeployTarget: c.String("pipeline.deploy-target"),
-		Created:      time.Unix(c.Int("pipeline.created"), 0),
-		Started:      time.Unix(c.Int("pipeline.started"), 0),
-		Finished:     time.Unix(c.Int("pipeline.finished"), 0),
-		Parent:       c.Int("pipeline.parent"),
+		Created:      time.Unix(c.Int64("pipeline.created"), 0),
+		Started:      time.Unix(c.Int64("pipeline.started"), 0),
+		Finished:     time.Unix(c.Int64("pipeline.finished"), 0),
+		Parent:       c.Int64("pipeline.parent"),
 	}
 }

@@ -74,7 +74,7 @@ func repositoryFlags(category string) []cli.Flag {
 			Sources:  cli.EnvVars("CI_REPO_DEFAULT_BRANCH"),
 			Category: category,
 		},
-		&cli.IntFlag{
+		&cli.Int64Flag{
 			Name:     "repo.remote-id",
 			Usage:    "repo remote id",
 			Sources:  cli.EnvVars("CI_REPO_REMOTE_ID"),
@@ -92,6 +92,6 @@ func repositoryFromContext(c *cli.Command) Repository {
 		CloneURL: c.String("repo.clone-url"),
 		Private:  c.Bool("repo.private"),
 		Branch:   c.String("repo.default-branch"),
-		RemoteID: c.Int("repo.remote-id"),
+		RemoteID: c.Int64("repo.remote-id"),
 	}
 }

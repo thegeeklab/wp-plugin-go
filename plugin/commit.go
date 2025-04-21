@@ -72,7 +72,7 @@ func currFlags(category string) []cli.Flag {
 			Sources:  cli.EnvVars("CI_COMMIT_REFSPEC"),
 			Category: category,
 		},
-		&cli.IntFlag{
+		&cli.Int64Flag{
 			Name:     "commit.pull-request",
 			Usage:    "commit pull request",
 			Sources:  cli.EnvVars("CI_COMMIT_PULL_REQUEST"),
@@ -137,7 +137,7 @@ func currFromContext(c *cli.Command) Commit {
 		SHA:          c.String("commit.sha"),
 		Ref:          c.String("commit.ref"),
 		Refspec:      c.String("commit.refspec"),
-		PullRequest:  c.Int("commit.pull-request"),
+		PullRequest:  c.Int64("commit.pull-request"),
 		SourceBranch: c.String("commit.source-branch"),
 		TargetBranch: c.String("commit.target-branch"),
 		Branch:       c.String("commit.branch"),

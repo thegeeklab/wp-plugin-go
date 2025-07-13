@@ -43,6 +43,7 @@ func TestStringMapSet(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var dest map[string]string
+
 			s := &StringMap{
 				destination: &dest,
 			}
@@ -92,6 +93,7 @@ func TestStringMapString(t *testing.T) {
 
 			if len(tt.input) > 1 {
 				var expected, actual map[string]string
+
 				_ = json.Unmarshal([]byte(tt.want), &expected)
 				_ = json.Unmarshal([]byte(got), &actual)
 				assert.EqualValues(t, expected, actual)
@@ -208,6 +210,7 @@ func TestStringMapToString(t *testing.T) {
 
 			if len(tt.input) > 1 {
 				var expected, actual map[string]string
+
 				_ = json.Unmarshal([]byte(tt.want), &expected)
 				_ = json.Unmarshal([]byte(got), &actual)
 				assert.EqualValues(t, expected, actual)

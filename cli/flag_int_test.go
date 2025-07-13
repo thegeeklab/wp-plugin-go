@@ -49,12 +49,12 @@ func TestIntSet(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var got int
+
 			i := &Int{
 				destination: &got,
 			}
 
 			err := i.Set(tt.input)
-
 			if tt.wantErr != nil {
 				assert.ErrorAs(t, err, &tt.wantErr)
 			} else {

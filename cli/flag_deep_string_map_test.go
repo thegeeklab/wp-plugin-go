@@ -43,6 +43,7 @@ func TestDeepStringMapSet(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var got map[string]map[string]string
+
 			d := &DeepStringMap{
 				destination: &got,
 			}
@@ -92,6 +93,7 @@ func TestDeepStringMapString(t *testing.T) {
 
 			if len(tt.input) > 1 {
 				var expected, actual map[string]map[string]string
+
 				_ = json.Unmarshal([]byte(tt.want), &expected)
 				_ = json.Unmarshal([]byte(got), &actual)
 				assert.EqualValues(t, expected, actual)
@@ -203,6 +205,7 @@ func TestDeepStringMapToString(t *testing.T) {
 
 			if len(tt.input) > 1 {
 				var expected, actual map[string]map[string]string
+
 				_ = json.Unmarshal([]byte(tt.want), &expected)
 				_ = json.Unmarshal([]byte(got), &actual)
 				assert.EqualValues(t, expected, actual)

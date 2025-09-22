@@ -8,18 +8,17 @@ PACKAGES ?= $(shell go list ./...)
 SOURCES ?= $(shell find . -name "*.go" -type f)
 
 GOFUMPT_PACKAGE ?= mvdan.cc/gofumpt@$(GOFUMPT_PACKAGE_VERSION)
-GOLANGCI_LINT_PACKAGE ?= github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_PACKAGE_VERSION)
 GOTESTSUM_PACKAGE ?= gotest.tools/gotestsum@latest
 
 GENERATE ?=
 
 .PHONY: fmt
 fmt:
-	$(GO) run $(GOFUMPT_PACKAGE) -extra -w $(SOURCES)
+	$(shell go env GOPATH)/bin/gofumpt -extra -w $(SOURCES)
 
 .PHONY: golangci-lint
 golangci-lint:
-	$(GO) run $(GOLANGCI_LINT_PACKAGE) run
+	$(shell go env GOPATH)/bin/golangci-lint run
 
 .PHONY: lint
 lint: golangci-lint
@@ -30,11 +29,11 @@ generate:
 
 .PHONY: test
 test:
-	$(GO) run $(GOTESTSUM_PACKAGE) --no-color=false -- -coverprofile=coverage.out $(PACKAGES)
+	$(shell go env GOPATH)/bin/gotestsum --no-color=false -- -coverprofile=coverage.out $(PACKAGES)
 
 .PHONY: deps
 deps:
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(shell go env GOPATH)/bin $(GOLANGCI_LINT_PACKAGE_VERSION)
 	$(GO) mod download
 	$(GO) install $(GOFUMPT_PACKAGE)
-	$(GO) install $(GOLANGCI_LINT_PACKAGE)
 	$(GO) install $(GOTESTSUM_PACKAGE)

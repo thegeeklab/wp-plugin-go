@@ -18,18 +18,17 @@ func testApp() *cli.Command {
 				Name:     "dummy-flag-int",
 				Usage:    "dummy int flag desc",
 				Sources:  cli.EnvVars("PLUGIN_DUMMY_FLAG_INT"),
-				Value:    10,
 				Required: true,
 			},
 			&cli.StringFlag{
 				Name:     "dummy-flag",
 				Usage:    "Dummy flag desc.",
 				Sources:  cli.EnvVars("PLUGIN_DUMMY_FLAG"),
-				Value:    "test",
 				Required: true,
 			},
 			&cli.StringFlag{
 				Name:    "simpe-flag",
+				Value:   "simple",
 				Sources: cli.EnvVars("PLUGIN_X_SIMPLE_FLAG"),
 			},
 			&cli.StringFlag{
@@ -104,14 +103,12 @@ func TestToData(t *testing.T) {
 					{
 						Name:        "dummy_flag",
 						Description: "Dummy flag desc.",
-						Default:     "\"test\"",
 						Type:        "string",
 						Required:    true,
 					},
 					{
 						Name:        "dummy_flag_int",
 						Description: "dummy int flag desc",
-						Default:     "10",
 						Type:        "integer",
 						Required:    true,
 					},
@@ -125,6 +122,7 @@ func TestToData(t *testing.T) {
 					{
 						Name:     "x_simple_flag",
 						Type:     "string",
+						Default:  "\"simple\"",
 						Required: false,
 					},
 					{

@@ -95,10 +95,17 @@ func parseFlags(flags []cli.Flag) []*PluginArg {
 
 		modArg.Name = strings.TrimPrefix(name, namePrefix)
 		modArg.Description = flag.GetUsage()
-		modArg.Default = flag.GetDefaultText()
 
 		if rf, _ := f.(cli.RequiredFlag); ok {
 			modArg.Required = rf.IsRequired()
+		}
+
+		if !modArg.Required && flag.IsDefaultVisible() {
+			if s := flag.GetDefaultText(); s != "" {
+				modArg.Default = s
+			} else if flag.TakesValue() && flag.GetValue() != "" {
+				modArg.Default = flag.GetValue()
+			}
 		}
 
 		modArg.Type = parseType(reflect.TypeOf(f).String())

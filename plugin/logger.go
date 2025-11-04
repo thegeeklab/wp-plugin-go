@@ -49,6 +49,7 @@ func SetupConsoleLogger(ctx context.Context, cmd *cli.Command) (context.Context,
 	}
 
 	zerolog.SetGlobalLevel(lvl)
+
 	log.Logger = zerolog.New(zerolog.ConsoleWriter{
 		Out:          os.Stdout,
 		PartsExclude: []string{zerolog.TimestampFieldName},
@@ -56,6 +57,7 @@ func SetupConsoleLogger(ctx context.Context, cmd *cli.Command) (context.Context,
 
 	if zerolog.GlobalLevel() <= zerolog.DebugLevel {
 		log.Logger = log.With().Caller().Logger()
+
 		log.Info().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
 	}
 

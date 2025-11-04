@@ -8,6 +8,7 @@ import (
 )
 
 // IntFlag is a flag type which supports integer values.
+//
 // Deprecated: Use cli.IntFlag instead.
 type (
 	IntFlag = cli.FlagBase[int, IntConfig, Int]

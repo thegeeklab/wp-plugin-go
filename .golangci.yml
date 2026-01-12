@@ -60,7 +60,6 @@ linters:
     - nolintlint
     - nonamedreturns
     - nosprintfhostport
-    - prealloc
     - predeclared
     - promlinter
     - reassign

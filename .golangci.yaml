@@ -1,3 +1,4 @@
+---
 version: "2"
 run:
   timeout: 5m
@@ -33,6 +34,7 @@ linters:
     - gocritic
     - gocyclo
     - godot
+    - godox
     - goheader
     - gomoddirectives
     - gomodguard
@@ -84,7 +86,8 @@ linters:
           arguments:
             - []
             - []
-            - - skipPackageNameChecks: true
+            - - skip-package-name-checks: true
+                skip-package-name-collision-with-go-std: true
     tagliatelle:
       case:
         rules:

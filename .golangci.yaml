@@ -101,13 +101,13 @@ linters:
       - builtin$
       - examples$
     rules:
-      - path: _test\.go$
-        linters:
+      - linters:
           - dupl
           - forcetypeassert
-      - path: flag_.*\.go$
-        linters:
+        path: _test\.go
+      - linters:
           - ireturn
+        path: flag_.*\.go
 
 formatters:
   enable:

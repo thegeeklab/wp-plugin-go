@@ -10,7 +10,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v3 v3.10.1
 	golang.org/x/net v0.56.0
-	golang.org/x/sys v0.46.0
+	golang.org/x/sys v0.47.0
 )
 
 require (

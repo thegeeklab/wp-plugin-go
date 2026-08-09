@@ -49,6 +49,11 @@ func (s StringMap) ToString(v map[string]string) string {
 }
 
 // Set implements the flag.Value interface.
+// JSON values that are not strings (numbers, booleans, null) are coerced to
+// their string representations. Input that is not valid JSON at all is stored
+// as-is under the "*" key. Set intentionally never returns errors.
+//
+//nolint:nilerr
 func (s *StringMap) Set(v string) error {
 	*s.destination = map[string]string{}
 
@@ -56,9 +61,19 @@ func (s *StringMap) Set(v string) error {
 		return nil
 	}
 
-	err := json.Unmarshal([]byte(v), s.destination)
-	if err != nil {
+	if err := json.Unmarshal([]byte(v), s.destination); err == nil {
+		return nil
+	}
+
+	var raw map[string]any
+	if json.Unmarshal([]byte(v), &raw) != nil {
 		(*s.destination)["*"] = v
+
+		return nil
+	}
+
+	for k, val := range raw {
+		(*s.destination)[k] = coerceToString(val)
 	}
 
 	return nil

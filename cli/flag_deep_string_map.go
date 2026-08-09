@@ -2,9 +2,13 @@ package cli
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 
 	"github.com/urfave/cli/v3"
 )
+
+var errParseDeepStringMap = errors.New("unable to parse flag value as JSON string map")
 
 // DeepStringMapFlag is a flag type which supports nested JSON string maps.
 type (
@@ -53,30 +57,39 @@ func (d DeepStringMap) ToString(v map[string]map[string]string) string {
 }
 
 // Set implements the flag.Value interface.
+// Valid nested JSON objects are parsed directly. JSON values that are not
+// strings (numbers, booleans, null) are coerced to their string
+// representations. Flat (non-nested) JSON objects are stored under the "*"
+// key with the same coercion applied. Input that is not valid JSON returns
+// an error.
 func (d *DeepStringMap) Set(v string) error {
+	*d.destination = map[string]map[string]string{}
+
 	if v == "" {
-		*d.destination = map[string]map[string]string{}
+		return nil
+	}
+
+	if err := json.Unmarshal([]byte(v), d.destination); err == nil {
+		return nil
+	}
+
+	var rawNested map[string]map[string]any
+	if json.Unmarshal([]byte(v), &rawNested) == nil {
+		*d.destination = convertNestedMap(rawNested)
 
 		return nil
 	}
 
-	err := json.Unmarshal([]byte(v), d.destination)
-	if err != nil {
-		// Try to parse as a single-level map
-		single := map[string]string{}
-
-		err := json.Unmarshal([]byte(v), &single)
-		if err != nil {
-			return err
+	var rawSingle map[string]any
+	if json.Unmarshal([]byte(v), &rawSingle) == nil {
+		*d.destination = map[string]map[string]string{
+			"*": convertFlatMap(rawSingle),
 		}
 
-		// Store the single-level map under a wildcard key
-		(*d.destination) = map[string]map[string]string{
-			"*": single,
-		}
+		return nil
 	}
 
-	return nil
+	return fmt.Errorf("%w: %q", errParseDeepStringMap, v)
 }
 
 // Get implements the flag.Value interface.

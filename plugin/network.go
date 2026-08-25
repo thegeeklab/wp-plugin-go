@@ -105,7 +105,6 @@ func NetworkFromContext(cmd *cli.Command) Network {
 	dialer := &net.Dialer{
 		Timeout:   NetDailerTimeout,
 		KeepAlive: NetDailerTimeout,
-		DualStack: true,
 	}
 
 	if len(socks) != 0 && !socksoff {

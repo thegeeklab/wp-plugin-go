@@ -31,6 +31,19 @@ func TestCmdRun(t *testing.T) {
 					Args: []string{"echo", "hello"},
 				},
 			},
+			wantTrace:  "▶  echo hello\n",
+			wantStdout: "hello\n",
+		},
+		{
+			name: "trace legacy",
+			cmd: &Cmd{
+				Trace:       true,
+				TraceLegacy: true,
+				Cmd: &exec.Cmd{
+					Path: echoPath,
+					Args: []string{"echo", "hello"},
+				},
+			},
 			wantTrace:  "+ echo hello\n",
 			wantStdout: "hello\n",
 		},
@@ -55,7 +68,7 @@ func TestCmdRun(t *testing.T) {
 					Env:  []string{"TEST=1"},
 				},
 			},
-			wantTrace:  "+ sh -c echo $TEST\n",
+			wantTrace:  "▶  sh -c echo $TEST\n",
 			wantStdout: "1\n",
 		},
 		{
@@ -68,7 +81,7 @@ func TestCmdRun(t *testing.T) {
 					Stderr: new(bytes.Buffer),
 				},
 			},
-			wantTrace:  "+ sh -c echo error >&2\n",
+			wantTrace:  "▶  sh -c echo error >&2\n",
 			wantStderr: "error\n",
 		},
 		{

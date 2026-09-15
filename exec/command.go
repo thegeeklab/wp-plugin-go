@@ -16,6 +16,7 @@ import (
 type Cmd struct {
 	*exec.Cmd
 	Trace       bool      // Print composed command before execution.
+	TraceLegacy bool      // Use legacy "+ " prefix instead of "▶ " for trace output.
 	TraceWriter io.Writer // Where to write the trace output.
 }
 
@@ -24,7 +25,11 @@ type Cmd struct {
 // Otherwise, the command is waited for and its exit status is returned.
 func (c *Cmd) Run() error {
 	if c.Trace {
-		fmt.Fprintf(c.TraceWriter, "+ %s\n", strings.Join(c.Args, " "))
+		if c.TraceLegacy {
+			fmt.Fprintf(c.TraceWriter, "+ %s\n", strings.Join(c.Args, " "))
+		} else {
+			fmt.Fprintf(c.TraceWriter, "▶  %s\n", strings.Join(c.Args, " "))
+		}
 	}
 
 	if err := c.Start(); err != nil {

@@ -83,16 +83,15 @@ func GetTemplateDataWithSource(app *cli.Command, sourcePath string) *CliTemplate
 		Description: prepareMultilineString(app.Description),
 		Usage:       prepareMultilineString(app.Usage),
 		UsageText:   prepareMultilineString(app.UsageText),
-		GlobalArgs:  prepareArgsWithValues(app.VisibleFlags(), loadLongDescriptions(sourcePath)),
+		GlobalArgs:  prepareArgsWithValues(app.VisibleFlags(), LongDescriptionsFor(app, sourcePath)),
 	}
 }
 
-// loadLongDescriptions reads long descriptions from a Go source file and
-// normalizes the keys by replacing dots and dashes with underscores so they
-// match the env-var-derived names produced by parseFlags. It returns an empty
-// map when sourcePath is empty or the file cannot be parsed so callers can
-// pass an unset path without failing the whole pipeline.
-func loadLongDescriptions(sourcePath string) map[string]string {
+// LongDescriptionsFor returns the long descriptions extracted from the Go
+// source file at sourcePath, keyed by normalized flag name. It returns an
+// empty map when sourcePath is empty or the file cannot be parsed so callers
+// can pass an unset path without failing the whole pipeline.
+func LongDescriptionsFor(_ *cli.Command, sourcePath string) map[string]string {
 	if sourcePath == "" {
 		return map[string]string{}
 	}
@@ -155,6 +154,8 @@ func parseFlags(flags []cli.Flag, longDescriptions map[string]string) []*PluginA
 		if !modArg.Required && flag.IsDefaultVisible() {
 			if s := flag.GetDefaultText(); s != "" {
 				modArg.Default = s
+			} else if flag.TypeName() == "bool" {
+				modArg.Default = flag.GetValue()
 			} else if flag.TakesValue() && flag.GetValue() != "" {
 				modArg.Default = flag.GetValue()
 			}

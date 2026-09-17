@@ -175,3 +175,36 @@ func TestGetTemplateDataWithSource(t *testing.T) {
 		})
 	}
 }
+
+func TestLongDescriptionsFor(t *testing.T) {
+	got := LongDescriptionsFor(testApp(), "testdata/flags.go")
+
+	want := map[string]string{
+		"dummy_flag": "Dummy flag long description spanning two source lines in the same paragraph.\n\n" +
+			"Second paragraph of the dummy flag long description.",
+		"slice_flag": "Long description for the slice flag with multiple paragraphs.\n\n" +
+			"Second paragraph for slice flag.",
+	}
+
+	assert.Equal(t, want, got)
+}
+
+func TestBoolFlagDefault(t *testing.T) {
+	app := &cli.Command{
+		Name: "test",
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:    "bool-flag",
+				Usage:   "bool flag desc",
+				Sources: cli.EnvVars("PLUGIN_BOOL_FLAG"),
+			},
+		},
+	}
+
+	got := GetTemplateData(app)
+
+	assert.Len(t, got.GlobalArgs, 1)
+	assert.Equal(t, "bool_flag", got.GlobalArgs[0].Name)
+	assert.Equal(t, "false", got.GlobalArgs[0].Default)
+	assert.Equal(t, "bool", got.GlobalArgs[0].Type)
+}

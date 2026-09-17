@@ -83,7 +83,7 @@ func GetTemplateDataWithSource(app *cli.Command, sourcePath string) *CliTemplate
 		Description: prepareMultilineString(app.Description),
 		Usage:       prepareMultilineString(app.Usage),
 		UsageText:   prepareMultilineString(app.UsageText),
-		GlobalArgs:  prepareArgsWithValues(app.VisibleFlags(), LongDescriptionsFor(app, sourcePath)),
+		GlobalArgs:  prepareArgsWithValues(app.VisibleFlags(), LongDescriptionsFor(sourcePath)),
 	}
 }
 
@@ -91,7 +91,7 @@ func GetTemplateDataWithSource(app *cli.Command, sourcePath string) *CliTemplate
 // source file at sourcePath, keyed by normalized flag name. It returns an
 // empty map when sourcePath is empty or the file cannot be parsed so callers
 // can pass an unset path without failing the whole pipeline.
-func LongDescriptionsFor(_ *cli.Command, sourcePath string) map[string]string {
+func LongDescriptionsFor(sourcePath string) map[string]string {
 	if sourcePath == "" {
 		return map[string]string{}
 	}

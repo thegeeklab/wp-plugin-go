@@ -177,7 +177,7 @@ func TestGetTemplateDataWithSource(t *testing.T) {
 }
 
 func TestLongDescriptionsFor(t *testing.T) {
-	got := LongDescriptionsFor(testApp(), "testdata/flags.go")
+	got := LongDescriptionsFor("testdata/flags.go")
 
 	want := map[string]string{
 		"dummy_flag": "Dummy flag long description spanning two source lines in the same paragraph.\n\n" +

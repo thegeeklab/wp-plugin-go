@@ -36,13 +36,20 @@ type CliTemplate struct {
 //go:embed templates
 var templateFs embed.FS
 
-// ToMarkdown creates a markdown string for the `*App`.
+// ToMarkdown creates a markdown string for the `*App` without long
+// descriptions. It is a convenience wrapper around ToMarkdownWithSource that
+// passes an empty sourcePath.
+func ToMarkdown(app *cli.Command) (string, error) {
+	return ToMarkdownWithSource(app, "")
+}
+
+// ToMarkdownWithSource creates a markdown string for the `*App`.
 // If sourcePath points to a readable Go source file, long descriptions are
 // extracted from leading doc comments above each flag's composite literal and
 // merged into the rendered output. An empty sourcePath disables long
 // description lookup.
 // The function errors if either parsing or writing of the string fails.
-func ToMarkdown(app *cli.Command, sourcePath string) (string, error) {
+func ToMarkdownWithSource(app *cli.Command, sourcePath string) (string, error) {
 	var w bytes.Buffer
 
 	tpls, err := template.New("cli").Funcs(plugin_template.LoadFuncMap()).ParseFS(templateFs, "**/*.tmpl")
@@ -50,14 +57,26 @@ func ToMarkdown(app *cli.Command, sourcePath string) (string, error) {
 		return "", err
 	}
 
-	if err := tpls.ExecuteTemplate(&w, "markdown.md.tmpl", GetTemplateData(app, sourcePath)); err != nil {
+	if err := tpls.ExecuteTemplate(&w, "markdown.md.tmpl", GetTemplateDataWithSource(app, sourcePath)); err != nil {
 		return "", err
 	}
 
 	return w.String(), nil
 }
 
-func GetTemplateData(app *cli.Command, sourcePath string) *CliTemplate {
+// GetTemplateData returns the template data for the `*App` without long
+// descriptions. It is a convenience wrapper around GetTemplateDataWithSource
+// that passes an empty sourcePath.
+func GetTemplateData(app *cli.Command) *CliTemplate {
+	return GetTemplateDataWithSource(app, "")
+}
+
+// GetTemplateDataWithSource returns the template data for the `*App`.
+// If sourcePath points to a readable Go source file, long descriptions are
+// extracted from leading doc comments above each flag's composite literal and
+// merged into the returned data. An empty sourcePath disables long
+// description lookup.
+func GetTemplateDataWithSource(app *cli.Command, sourcePath string) *CliTemplate {
 	return &CliTemplate{
 		Name:        app.Name,
 		Version:     app.Version,

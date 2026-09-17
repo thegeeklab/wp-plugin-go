@@ -65,7 +65,15 @@ func testFileContent(t *testing.T, file string) string {
 	return string(data)
 }
 
-func TestToMarkdownFull(t *testing.T) {
+func TestToMarkdown(t *testing.T) {
+	want := testFileContent(t, "testdata/expected-doc-no-long.md")
+
+	got, err := ToMarkdown(testApp())
+	assert.NoError(t, err)
+	assert.Equal(t, want, got)
+}
+
+func TestToMarkdownWithSource(t *testing.T) {
 	tests := []struct {
 		name       string
 		app        *cli.Command
@@ -95,13 +103,17 @@ func TestToMarkdownFull(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			want := testFileContent(t, tt.want)
-			got, _ := ToMarkdown(tt.app, tt.sourcePath)
+			got, _ := ToMarkdownWithSource(tt.app, tt.sourcePath)
 			assert.Equal(t, want, got)
 		})
 	}
 }
 
-func TestToData(t *testing.T) {
+func TestGetTemplateData(t *testing.T) {
+	assert.Equal(t, GetTemplateDataWithSource(testApp(), ""), GetTemplateData(testApp()))
+}
+
+func TestGetTemplateDataWithSource(t *testing.T) {
 	tests := []struct {
 		name       string
 		app        *cli.Command
@@ -158,7 +170,7 @@ func TestToData(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := GetTemplateData(tt.app, tt.sourcePath)
+			got := GetTemplateDataWithSource(tt.app, tt.sourcePath)
 			assert.Equal(t, tt.want, got)
 		})
 	}

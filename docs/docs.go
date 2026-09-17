@@ -3,11 +3,11 @@ package docs
 import (
 	"bytes"
 	"embed"
-	"html/template"
 	"reflect"
 	"regexp"
 	"sort"
 	"strings"
+	"text/template"
 
 	plugin_template "github.com/thegeeklab/wp-plugin-go/v6/template"
 
@@ -15,12 +15,13 @@ import (
 )
 
 type PluginArg struct {
-	Name        string
-	EnvVars     []string
-	Description string
-	Default     string
-	Type        string
-	Required    bool
+	Name            string
+	EnvVars         []string
+	Description     string
+	LongDescription string
+	Default         string
+	Type            string
+	Required        bool
 }
 
 type CliTemplate struct {
@@ -35,9 +36,13 @@ type CliTemplate struct {
 //go:embed templates
 var templateFs embed.FS
 
-// ToMarkdown creates a markdown string for the `*App`
+// ToMarkdown creates a markdown string for the `*App`.
+// If sourcePath points to a readable Go source file, long descriptions are
+// extracted from leading doc comments above each flag's composite literal and
+// merged into the rendered output. An empty sourcePath disables long
+// description lookup.
 // The function errors if either parsing or writing of the string fails.
-func ToMarkdown(app *cli.Command) (string, error) {
+func ToMarkdown(app *cli.Command, sourcePath string) (string, error) {
 	var w bytes.Buffer
 
 	tpls, err := template.New("cli").Funcs(plugin_template.LoadFuncMap()).ParseFS(templateFs, "**/*.tmpl")
@@ -45,22 +50,49 @@ func ToMarkdown(app *cli.Command) (string, error) {
 		return "", err
 	}
 
-	if err := tpls.ExecuteTemplate(&w, "markdown.md.tmpl", GetTemplateData(app)); err != nil {
+	if err := tpls.ExecuteTemplate(&w, "markdown.md.tmpl", GetTemplateData(app, sourcePath)); err != nil {
 		return "", err
 	}
 
 	return w.String(), nil
 }
 
-func GetTemplateData(app *cli.Command) *CliTemplate {
+func GetTemplateData(app *cli.Command, sourcePath string) *CliTemplate {
 	return &CliTemplate{
 		Name:        app.Name,
 		Version:     app.Version,
 		Description: prepareMultilineString(app.Description),
 		Usage:       prepareMultilineString(app.Usage),
 		UsageText:   prepareMultilineString(app.UsageText),
-		GlobalArgs:  prepareArgsWithValues(app.VisibleFlags()),
+		GlobalArgs:  prepareArgsWithValues(app.VisibleFlags(), loadLongDescriptions(sourcePath)),
 	}
+}
+
+// loadLongDescriptions reads long descriptions from a Go source file and
+// normalizes the keys by replacing dots and dashes with underscores so they
+// match the env-var-derived names produced by parseFlags. It returns an empty
+// map when sourcePath is empty or the file cannot be parsed so callers can
+// pass an unset path without failing the whole pipeline.
+func loadLongDescriptions(sourcePath string) map[string]string {
+	if sourcePath == "" {
+		return map[string]string{}
+	}
+
+	longs, err := LongDescriptions(sourcePath)
+	if err != nil {
+		return map[string]string{}
+	}
+
+	normalized := make(map[string]string, len(longs))
+	for name, desc := range longs {
+		normalized[normalizeFlagName(name)] = desc
+	}
+
+	return normalized
+}
+
+func normalizeFlagName(name string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(name, "-", "_"), ".", "_")
 }
 
 func prepareMultilineString(s string) string {
@@ -72,11 +104,11 @@ func prepareMultilineString(s string) string {
 	)
 }
 
-func prepareArgsWithValues(flags []cli.Flag) []*PluginArg {
-	return parseFlags(flags)
+func prepareArgsWithValues(flags []cli.Flag, longDescriptions map[string]string) []*PluginArg {
+	return parseFlags(flags, longDescriptions)
 }
 
-func parseFlags(flags []cli.Flag) []*PluginArg {
+func parseFlags(flags []cli.Flag, longDescriptions map[string]string) []*PluginArg {
 	args := make([]*PluginArg, 0)
 	namePrefix := "plugin_"
 
@@ -95,6 +127,7 @@ func parseFlags(flags []cli.Flag) []*PluginArg {
 
 		modArg.Name = strings.TrimPrefix(name, namePrefix)
 		modArg.Description = flag.GetUsage()
+		modArg.LongDescription = formatLongDescription(longDescriptions[modArg.Name])
 
 		if rf, _ := f.(cli.RequiredFlag); ok {
 			modArg.Required = rf.IsRequired()
@@ -118,6 +151,23 @@ func parseFlags(flags []cli.Flag) []*PluginArg {
 	})
 
 	return args
+}
+
+// formatLongDescription converts a long description from LongDescriptions
+// (paragraphs separated by "\n\n") into a markdown-ready string with each
+// paragraph prefixed by "&emsp;". Returns an empty string for empty input.
+func formatLongDescription(s string) string {
+	if s == "" {
+		return ""
+	}
+
+	paragraphs := strings.Split(s, "\n\n")
+
+	for i, p := range paragraphs {
+		paragraphs[i] = "&emsp;" + p
+	}
+
+	return strings.Join(paragraphs, "\n\n")
 }
 
 func parseType(raw string) string {

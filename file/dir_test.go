@@ -1,61 +1,140 @@
 package file
 
 import (
-	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestIsDirEmpty(t *testing.T) {
-	t.Run("empty directory", func(t *testing.T) {
-		dir := t.TempDir()
+	tests := []struct {
+		name       string
+		dir        string
+		createFile bool
+		want       bool
+		wantErr    error
+	}{
+		{
+			name: "empty directory",
+			want: true,
+		},
+		{
+			name:       "non-empty directory",
+			createFile: true,
+			want:       false,
+		},
+		{
+			name:    "non-existent directory",
+			dir:     filepath.Join(os.TempDir(), "non-existent"),
+			want:    false,
+			wantErr: fs.ErrNotExist,
+		},
+	}
 
-		isEmpty, err := IsDirEmpty(dir)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := tt.dir
+			if dir == "" {
+				dir = t.TempDir()
+			}
 
-		if !isEmpty {
-			t.Error("expected directory to be empty")
-		}
-	})
+			if tt.createFile {
+				file, err := os.CreateTemp(dir, "test")
+				if err != nil {
+					t.Fatal(err)
+				}
 
-	t.Run("non-empty directory", func(t *testing.T) {
-		dir := t.TempDir()
+				file.Close()
+			}
 
-		file, err := os.CreateTemp(dir, "test")
-		if err != nil {
-			t.Fatalf("failed to create temp file: %v", err)
-		}
+			isEmpty, err := IsDirEmpty(dir)
+			if tt.wantErr != nil {
+				assert.Error(t, err)
+				assert.ErrorIs(t, err, tt.wantErr)
+				assert.False(t, isEmpty)
 
-		file.Close()
+				return
+			}
 
-		isEmpty, err := IsDirEmpty(dir)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, isEmpty)
+		})
+	}
+}
 
-		if isEmpty {
-			t.Error("expected directory to be non-empty")
-		}
-	})
+func TestIsDir(t *testing.T) {
+	dir := t.TempDir()
 
-	t.Run("non-existent directory", func(t *testing.T) {
-		dir := filepath.Join(os.TempDir(), "non-existent")
+	file, err := os.CreateTemp(dir, "test")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-		isEmpty, err := IsDirEmpty(dir)
-		if err == nil {
-			t.Error("expected an error for non-existent directory")
-		}
+	file.Close()
 
-		if isEmpty {
-			t.Error("expected directory to be non-empty")
-		}
+	tests := []struct {
+		name string
+		path string
+		want bool
+	}{
+		{
+			name: "directory",
+			path: dir,
+			want: true,
+		},
+		{
+			name: "file",
+			path: file.Name(),
+			want: false,
+		},
+		{
+			name: "non-existent path",
+			path: filepath.Join(dir, "non-existent"),
+			want: false,
+		},
+	}
 
-		if !errors.Is(err, fs.ErrNotExist) {
-			t.Errorf("unexpected error: %v", err)
-		}
-	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := IsDir(tt.path)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestDeleteDir(t *testing.T) {
+	dir := t.TempDir()
+
+	existingDir := filepath.Join(dir, "existing")
+	if err := os.Mkdir(existingDir, 0o750); err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		name string
+		path string
+	}{
+		{
+			name: "delete existing directory",
+			path: existingDir,
+		},
+		{
+			name: "delete non-existent directory",
+			path: filepath.Join(dir, "non-existent"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := DeleteDir(tt.path)
+			assert.NoError(t, err)
+
+			_, statErr := os.Stat(tt.path)
+			assert.ErrorIs(t, statErr, fs.ErrNotExist)
+		})
+	}
 }

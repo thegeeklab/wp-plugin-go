@@ -8,53 +8,53 @@ import (
 
 func TestSetDifference(t *testing.T) {
 	tests := []struct {
-		name     string
-		a        []string
-		b        []string
-		expected []string
-		unique   bool
+		name   string
+		a      []string
+		b      []string
+		want   []string
+		unique bool
 	}{
 		{
-			name:     "both empty",
-			a:        []string{},
-			b:        []string{},
-			expected: []string{},
-			unique:   false,
+			name:   "both empty",
+			a:      []string{},
+			b:      []string{},
+			want:   []string{},
+			unique: false,
 		},
 		{
-			name:     "remove common element",
-			a:        []string{"a", "b", "c"},
-			b:        []string{"b"},
-			expected: []string{"a", "c"},
-			unique:   false,
+			name:   "remove common element",
+			a:      []string{"a", "b", "c"},
+			b:      []string{"b"},
+			want:   []string{"a", "c"},
+			unique: false,
 		},
 		{
-			name:     "remove a and c",
-			a:        []string{"a", "b", "c"},
-			b:        []string{"a", "c"},
-			expected: []string{"b"},
-			unique:   false,
+			name:   "remove a and c",
+			a:      []string{"a", "b", "c"},
+			b:      []string{"a", "c"},
+			want:   []string{"b"},
+			unique: false,
 		},
 		{
-			name:     "no common elements",
-			a:        []string{"a", "b", "c"},
-			b:        []string{"d", "e"},
-			expected: []string{"a", "b", "c"},
-			unique:   false,
+			name:   "no common elements",
+			a:      []string{"a", "b", "c"},
+			b:      []string{"d", "e"},
+			want:   []string{"a", "b", "c"},
+			unique: false,
 		},
 		{
-			name:     "remove duplicates",
-			a:        []string{"a", "a", "b"},
-			b:        []string{"b"},
-			expected: []string{"a"},
-			unique:   true,
+			name:   "remove duplicates",
+			a:      []string{"a", "a", "b"},
+			b:      []string{"b"},
+			want:   []string{"a"},
+			unique: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := SetDifference(tt.a, tt.b, tt.unique)
-			assert.Equal(t, tt.expected, result)
+			assert.Equal(t, tt.want, result)
 		})
 	}
 }

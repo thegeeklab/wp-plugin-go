@@ -20,16 +20,16 @@ func DeleteDir(path string) error {
 // IsDir returns whether the given path is a directory. If the path does not exist, it returns (false, nil).
 // If there is an error checking the path, it returns (false, err).
 func IsDir(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
+	info, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+
+		return false, err
 	}
 
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-
-	return false, err
+	return info.IsDir(), nil
 }
 
 // IsDirEmpty checks if the directory at the given path is empty.

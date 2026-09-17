@@ -65,37 +65,65 @@ func testFileContent(t *testing.T, file string) string {
 	return string(data)
 }
 
-func TestToMarkdownFull(t *testing.T) {
+func TestToMarkdown(t *testing.T) {
+	want := testFileContent(t, "testdata/expected-doc-no-long.md")
+
+	got, err := ToMarkdown(testApp())
+	assert.NoError(t, err)
+	assert.Equal(t, want, got)
+}
+
+func TestToMarkdownWithSource(t *testing.T) {
 	tests := []struct {
-		name string
-		app  *cli.Command
-		want string
+		name       string
+		app        *cli.Command
+		sourcePath string
+		want       string
 	}{
 		{
-			"normal branch",
-			testApp(),
-			"testdata/expected-doc-full.md",
+			name:       "normal branch",
+			app:        testApp(),
+			sourcePath: "testdata/flags.go",
+			want:       "testdata/expected-doc-full.md",
+		},
+		{
+			name:       "empty source path skips long descriptions",
+			app:        testApp(),
+			sourcePath: "",
+			want:       "testdata/expected-doc-no-long.md",
+		},
+		{
+			name:       "missing source path skips long descriptions gracefully",
+			app:        testApp(),
+			sourcePath: "testdata/does-not-exist.go",
+			want:       "testdata/expected-doc-no-long.md",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			want := testFileContent(t, tt.want)
-			got, _ := ToMarkdown(tt.app)
+			got, _ := ToMarkdownWithSource(tt.app, tt.sourcePath)
 			assert.Equal(t, want, got)
 		})
 	}
 }
 
-func TestToData(t *testing.T) {
+func TestGetTemplateData(t *testing.T) {
+	assert.Equal(t, GetTemplateDataWithSource(testApp(), ""), GetTemplateData(testApp()))
+}
+
+func TestGetTemplateDataWithSource(t *testing.T) {
 	tests := []struct {
-		name string
-		app  *cli.Command
-		want *CliTemplate
+		name       string
+		app        *cli.Command
+		sourcePath string
+		want       *CliTemplate
 	}{
 		{
-			name: "normal branch",
-			app:  testApp(),
+			name:       "normal branch",
+			app:        testApp(),
+			sourcePath: "testdata/flags.go",
 			want: &CliTemplate{
 				Name:        "test",
 				Description: "test description",
@@ -103,8 +131,10 @@ func TestToData(t *testing.T) {
 					{
 						Name:        "dummy_flag",
 						Description: "Dummy flag desc.",
-						Type:        "string",
-						Required:    true,
+						LongDescription: "&emsp;Dummy flag long description spanning two source lines " +
+							"in the same paragraph.\n\n&emsp;Second paragraph of the dummy flag long description.",
+						Type:     "string",
+						Required: true,
 					},
 					{
 						Name:        "dummy_flag_int",
@@ -115,9 +145,11 @@ func TestToData(t *testing.T) {
 					{
 						Name:        "slice_flag",
 						Description: "slice flag",
-						Default:     "",
-						Type:        "list",
-						Required:    false,
+						LongDescription: "&emsp;Long description for the slice flag with multiple paragraphs." +
+							"\n\n&emsp;Second paragraph for slice flag.",
+						Default:  "",
+						Type:     "list",
+						Required: false,
 					},
 					{
 						Name:     "x_simple_flag",
@@ -138,8 +170,41 @@ func TestToData(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := GetTemplateData(tt.app)
+			got := GetTemplateDataWithSource(tt.app, tt.sourcePath)
 			assert.Equal(t, tt.want, got)
 		})
 	}
+}
+
+func TestLongDescriptionsFor(t *testing.T) {
+	got := LongDescriptionsFor("testdata/flags.go")
+
+	want := map[string]string{
+		"dummy_flag": "Dummy flag long description spanning two source lines in the same paragraph.\n\n" +
+			"Second paragraph of the dummy flag long description.",
+		"slice_flag": "Long description for the slice flag with multiple paragraphs.\n\n" +
+			"Second paragraph for slice flag.",
+	}
+
+	assert.Equal(t, want, got)
+}
+
+func TestBoolFlagDefault(t *testing.T) {
+	app := &cli.Command{
+		Name: "test",
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:    "bool-flag",
+				Usage:   "bool flag desc",
+				Sources: cli.EnvVars("PLUGIN_BOOL_FLAG"),
+			},
+		},
+	}
+
+	got := GetTemplateData(app)
+
+	assert.Len(t, got.GlobalArgs, 1)
+	assert.Equal(t, "bool_flag", got.GlobalArgs[0].Name)
+	assert.Equal(t, "false", got.GlobalArgs[0].Default)
+	assert.Equal(t, "bool", got.GlobalArgs[0].Type)
 }

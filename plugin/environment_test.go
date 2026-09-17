@@ -1,10 +1,12 @@
 package plugin
 
 import (
+	"context"
 	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/urfave/cli/v3"
 )
 
 func TestEnvironment_Lookup(t *testing.T) {
@@ -127,6 +129,62 @@ func TestEnvironment_Value(t *testing.T) {
 			// Sort both slices to ensure consistent comparison
 			sort.Strings(got)
 			sort.Strings(tt.want)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestEnvironmentFromContext(t *testing.T) {
+	tests := []struct {
+		name    string
+		env     string
+		bare    bool
+		want    Environment
+		wantErr bool
+	}{
+		{
+			name: "environment map from context",
+			env:  `{"KEY1":"value1","KEY2":"value2"}`,
+			want: Environment{
+				"KEY1": "value1",
+				"KEY2": "value2",
+			},
+		},
+		{
+			name:    "missing environment flag",
+			bare:    true,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.bare {
+				got, err := EnvironmentFromContext(&cli.Command{})
+				assert.Error(t, err)
+				assert.Nil(t, got)
+
+				return
+			}
+
+			plugin := New(Options{
+				Name:    "dummy",
+				Execute: func(_ context.Context) error { return nil },
+			})
+
+			t.Setenv("PLUGIN_ENVIRONMENT", tt.env)
+
+			var got Environment
+
+			plugin.App.Action = func(_ context.Context, cmd *cli.Command) error {
+				var err error
+
+				got, err = EnvironmentFromContext(cmd)
+
+				return err
+			}
+
+			assert.NoError(t, plugin.App.Run(t.Context(), []string{"dummy"}))
 			assert.Equal(t, tt.want, got)
 		})
 	}

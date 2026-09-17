@@ -7,9 +7,13 @@
 
 ## Parameters
 {{ range $v := .GlobalArgs }}
-**_{{ $v.Name }}_**{{ if $v.Required }} _required_{{ end }}{{ with $v.Default }} (default: {{ . }}){{ end }}{{ if $v.Description }}{{ "\\" }}{{ end }}
+**_{{ $v.Name }}_**{{ if $v.Required }} _required_{{ end }}{{ with $v.Default }} (default: {{ . }}){{ end }}{{ if or $v.Description $v.LongDescription }}{{ "\\" }}{{ end }}
 {{- with $v.Description }}
 &emsp;{{ . | ToSentence }}
+{{- end }}
+{{- with $v.LongDescription }}
+
+{{ . }}
 {{- end }}
 {{ end -}}
 {{ end -}}

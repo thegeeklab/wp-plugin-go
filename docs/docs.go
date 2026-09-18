@@ -14,6 +14,10 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+// PluginArg is one flag in the rendered CLI doc, populated by
+// parseFlags. LongDescription is the markdown-formatted string produced
+// by LongDescriptionMarkdown — it is *not* the structured *LongDescription
+// type, despite sharing a name.
 type PluginArg struct {
 	Name            string
 	EnvVars         []string
@@ -24,6 +28,8 @@ type PluginArg struct {
 	Required        bool
 }
 
+// CliTemplate is the template-data root handed to the markdown template
+// by GetTemplateDataWithSource.
 type CliTemplate struct {
 	Name        string
 	Version     string
@@ -83,34 +89,8 @@ func GetTemplateDataWithSource(app *cli.Command, sourcePath string) *CliTemplate
 		Description: prepareMultilineString(app.Description),
 		Usage:       prepareMultilineString(app.Usage),
 		UsageText:   prepareMultilineString(app.UsageText),
-		GlobalArgs:  prepareArgsWithValues(app.VisibleFlags(), LongDescriptionsFor(sourcePath)),
+		GlobalArgs:  prepareArgsWithValues(app.VisibleFlags(), LongDescriptionsForWith(sourcePath)),
 	}
-}
-
-// LongDescriptionsFor returns the long descriptions extracted from the Go
-// source file at sourcePath, keyed by normalized flag name. It returns an
-// empty map when sourcePath is empty or the file cannot be parsed so callers
-// can pass an unset path without failing the whole pipeline.
-func LongDescriptionsFor(sourcePath string) map[string]string {
-	if sourcePath == "" {
-		return map[string]string{}
-	}
-
-	longs, err := LongDescriptions(sourcePath)
-	if err != nil {
-		return map[string]string{}
-	}
-
-	normalized := make(map[string]string, len(longs))
-	for name, desc := range longs {
-		normalized[normalizeFlagName(name)] = desc
-	}
-
-	return normalized
-}
-
-func normalizeFlagName(name string) string {
-	return strings.ReplaceAll(strings.ReplaceAll(name, "-", "_"), ".", "_")
 }
 
 func prepareMultilineString(s string) string {
@@ -122,11 +102,11 @@ func prepareMultilineString(s string) string {
 	)
 }
 
-func prepareArgsWithValues(flags []cli.Flag, longDescriptions map[string]string) []*PluginArg {
+func prepareArgsWithValues(flags []cli.Flag, longDescriptions map[string]*LongDescription) []*PluginArg {
 	return parseFlags(flags, longDescriptions)
 }
 
-func parseFlags(flags []cli.Flag, longDescriptions map[string]string) []*PluginArg {
+func parseFlags(flags []cli.Flag, longDescriptions map[string]*LongDescription) []*PluginArg {
 	args := make([]*PluginArg, 0)
 	namePrefix := "plugin_"
 
@@ -145,7 +125,7 @@ func parseFlags(flags []cli.Flag, longDescriptions map[string]string) []*PluginA
 
 		modArg.Name = strings.TrimPrefix(name, namePrefix)
 		modArg.Description = flag.GetUsage()
-		modArg.LongDescription = formatLongDescription(longDescriptions[modArg.Name])
+		modArg.LongDescription = LongDescriptionMarkdown(longDescriptions[modArg.Name])
 
 		if rf, _ := f.(cli.RequiredFlag); ok {
 			modArg.Required = rf.IsRequired()
@@ -173,21 +153,58 @@ func parseFlags(flags []cli.Flag, longDescriptions map[string]string) []*PluginA
 	return args
 }
 
-// formatLongDescription converts a long description from LongDescriptions
-// (paragraphs separated by "\n\n") into a markdown-ready string with each
-// paragraph prefixed by "&emsp;". Returns an empty string for empty input.
-func formatLongDescription(s string) string {
-	if s == "" {
+// LongDescriptionMarkdown renders a structured LongDescription as a
+// markdown-ready string. Line breaks inside a paragraph collapse to a
+// single space so markdown renderers flow the text as one sentence; each
+// paragraph is prefixed with "&emsp;" to visually align with the short
+// Description line that precedes it.
+func LongDescriptionMarkdown(d *LongDescription) string {
+	if d.IsZero() {
 		return ""
 	}
 
-	paragraphs := strings.Split(s, "\n\n")
-
-	for i, p := range paragraphs {
-		paragraphs[i] = "&emsp;" + p
+	parts := make([]string, len(d.Paragraphs))
+	for i, p := range d.Paragraphs {
+		parts[i] = "&emsp;" + strings.Join(p, " ")
 	}
 
-	return strings.Join(paragraphs, "\n\n")
+	return strings.Join(parts, "\n\n")
+}
+
+// LongDescriptionYAMLBlock renders a structured LongDescription as the
+// body of a YAML literal block scalar. Every source line is prefixed
+// with indent; paragraphs are separated by a blank line so the visual
+// structure of the original comment is preserved end-to-end; the
+// separator blank lines carry no trailing whitespace.
+//
+// The function is the format-agnostic building block — it knows about
+// YAML's `|` literal-block rules but not about any specific data
+// schema. Consumers compose the surrounding "key: |" line themselves
+// (the key name and nesting depth vary per consumer and determine the
+// required indent).
+func LongDescriptionYAMLBlock(d *LongDescription, indent string) string {
+	if d.IsZero() {
+		return ""
+	}
+
+	var b strings.Builder
+
+	for i, p := range d.Paragraphs {
+		if i > 0 {
+			b.WriteString("\n\n")
+		}
+
+		for j, line := range p {
+			if j > 0 {
+				b.WriteByte('\n')
+			}
+
+			b.WriteString(indent)
+			b.WriteString(line)
+		}
+	}
+
+	return b.String()
 }
 
 func parseType(raw string) string {

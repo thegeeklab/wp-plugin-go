@@ -7,21 +7,81 @@ import (
 	"strings"
 )
 
-// LongDescriptions parses a Go source file and returns a map from each
-// urfave/cli flag's Name field to its long docs description, derived from
-// the leading doc comment directly above the flag's composite literal.
+// LongDescription is a structured representation of the leading doc
+// comment above a flag literal. Source layout is preserved so consumers
+// can adapt it to any output format (markdown, YAML literal blocks,
+// AsciiDoc, etc.) without re-parsing a flattened string.
 //
-// Convention: a // comment block directly above an &cli.XFlag{...} literal
-// is treated as the long docs description. Lines within a paragraph are
-// joined with spaces; paragraphs (separated by an empty // line) are joined
-// with "\n\n". A blank line in the source between the comment and the
-// literal breaks the association.
+// Paragraphs split on empty // lines — the standard godoc/JSDoc
+// convention. Each Paragraph keeps its original source lines (the "// "
+// comment prefix is stripped, but additional leading whitespace such as
+// the two-space indent used for markdown list-item continuations is
+// preserved verbatim).
+type LongDescription struct {
+	// Paragraphs indexes paragraphs (outer) × source lines (inner).
+	Paragraphs [][]string
+}
+
+// IsZero reports whether the receiver has no paragraphs.
+func (d *LongDescription) IsZero() bool {
+	if d == nil {
+		return true
+	}
+
+	return len(d.Paragraphs) == 0
+}
+
+// Flat returns the description as a single string — the canonical
+// lossless serialisation. Lines inside a paragraph are joined with "\n"
+// and paragraphs are joined with "\n\n".
+func (d *LongDescription) Flat() string {
+	if d.IsZero() {
+		return ""
+	}
+
+	parts := make([]string, len(d.Paragraphs))
+	for i, p := range d.Paragraphs {
+		parts[i] = strings.Join(p, "\n")
+	}
+
+	return strings.Join(parts, "\n\n")
+}
+
+// String implements fmt.Stringer and is equivalent to Flat.
+func (d *LongDescription) String() string {
+	return d.Flat()
+}
+
+// FlagTypeMatcher reports whether an AST type expression refers to a
+// flag composite literal that the caller wants documented. See
+// DefaultFlagTypeMatcher for the built-in matcher and LongDescriptionsWith
+// for usage.
+type FlagTypeMatcher func(ast.Expr) bool
+
+// LongDescriptionsWith parses sourcePath and extracts a LongDescription
+// for every flag composite literal whose type matches at least one of
+// the supplied matchers (OR semantics; evaluation short-circuits at the
+// first match). When matchers is empty, only DefaultFlagTypeMatcher is
+// applied.
 //
-// This helper is intentionally format-agnostic: callers are responsible
-// for merging the result into their docs format of choice (YAML, JSON,
-// markdown, etc.).
-func LongDescriptions(sourcePath string) (map[string]string, error) {
-	out := make(map[string]string)
+// A // comment block directly above an &<flag>Flag{...} literal is
+// treated as the long docs description; a blank line in the source
+// between the comment and the literal breaks the association.
+//
+// A typical call site that wants both urfave core flags and wp-plugin-go
+// custom flag types:
+//
+//	docs.LongDescriptionsWith(
+//	    "plugin/plugin.go",
+//	    docs.DefaultFlagTypeMatcher,
+//	    docs.SelectorMatcher("plugin_cli", "StringMapFlag", "DeepStringMapFlag"),
+//	)
+func LongDescriptionsWith(sourcePath string, matchers ...FlagTypeMatcher) (map[string]*LongDescription, error) {
+	out := make(map[string]*LongDescription)
+
+	if len(matchers) == 0 {
+		matchers = []FlagTypeMatcher{DefaultFlagTypeMatcher}
+	}
 
 	fset := token.NewFileSet()
 
@@ -36,7 +96,7 @@ func LongDescriptions(sourcePath string) (map[string]string, error) {
 			return true
 		}
 
-		if !isUrfaveFlagType(cl.Type) {
+		if !matchesAny(cl.Type, matchers) {
 			return true
 		}
 
@@ -45,8 +105,8 @@ func LongDescriptions(sourcePath string) (map[string]string, error) {
 			return true
 		}
 
-		long := commentText(cg)
-		if long == "" {
+		desc := parseComment(cg)
+		if desc.IsZero() {
 			return true
 		}
 
@@ -55,7 +115,7 @@ func LongDescriptions(sourcePath string) (map[string]string, error) {
 			return true
 		}
 
-		out[name] = long
+		out[name] = desc
 
 		return true
 	})
@@ -63,7 +123,73 @@ func LongDescriptions(sourcePath string) (map[string]string, error) {
 	return out, nil
 }
 
-func isUrfaveFlagType(expr ast.Expr) bool {
+// LongDescriptionsForWith is the matcher-aware template-data convenience
+// wrapper around LongDescriptionsWith. It normalises flag names so
+// "upload.metadata" matches the env-derived "upload_metadata", and
+// returns an empty map (instead of an error) when sourcePath is empty or
+// unparseable, so a missing source never breaks a docs pipeline.
+func LongDescriptionsForWith(sourcePath string, matchers ...FlagTypeMatcher) map[string]*LongDescription {
+	if sourcePath == "" {
+		return map[string]*LongDescription{}
+	}
+
+	descs, err := LongDescriptionsWith(sourcePath, matchers...)
+	if err != nil {
+		return map[string]*LongDescription{}
+	}
+
+	normalized := make(map[string]*LongDescription, len(descs))
+	for name, d := range descs {
+		normalized[normalizeFlagName(name)] = d
+	}
+
+	return normalized
+}
+
+// LongDescriptions is the v6.4.0-compatible flat-string adapter around
+// LongDescriptionsWith. It returns descriptions serialised via Flat() —
+// the same canonical string form documented on LongDescription.Flat.
+//
+// Retained to avoid breaking the v6.x API. New callers should prefer
+// LongDescriptionsWith, which exposes the structured form and lets
+// callers choose their own formatter.
+func LongDescriptions(sourcePath string) (map[string]string, error) {
+	descs, err := LongDescriptionsWith(sourcePath)
+	if err != nil {
+		return nil, err
+	}
+
+	out := make(map[string]string, len(descs))
+	for name, d := range descs {
+		out[name] = d.Flat()
+	}
+
+	return out, nil
+}
+
+// LongDescriptionsFor is the v6.4.0-compatible flat-string adapter
+// around LongDescriptionsForWith. It mirrors the normalisation behaviour
+// of LongDescriptionsForWith (so "upload.metadata" matches
+// "upload_metadata") and returns descriptions serialised via Flat().
+//
+// Retained to avoid breaking the v6.x API. New callers should prefer
+// LongDescriptionsForWith.
+func LongDescriptionsFor(sourcePath string) map[string]string {
+	descs := LongDescriptionsForWith(sourcePath)
+
+	out := make(map[string]string, len(descs))
+	for name, d := range descs {
+		out[name] = d.Flat()
+	}
+
+	return out
+}
+
+// DefaultFlagTypeMatcher matches the urfave/cli/v3 core flag composite
+// literals: BoolFlag, StringFlag, IntFlag and StringSliceFlag. Custom
+// flag types are intentionally not matched here — see LongDescriptionsWith
+// for the extension mechanism.
+func DefaultFlagTypeMatcher(expr ast.Expr) bool {
 	sel, ok := expr.(*ast.SelectorExpr)
 	if !ok {
 		return false
@@ -80,6 +206,52 @@ func isUrfaveFlagType(expr ast.Expr) bool {
 	}
 
 	return false
+}
+
+// SelectorMatcher returns a FlagTypeMatcher that matches selector
+// expressions whose package ident equals pkg and whose selector name is
+// in names. Use it to build a matcher for custom flag types:
+//
+//	docs.SelectorMatcher("plugin_cli", "StringMapFlag", "DeepStringMapFlag")
+func SelectorMatcher(pkg string, names ...string) FlagTypeMatcher {
+	set := make(map[string]struct{}, len(names))
+	for _, n := range names {
+		set[n] = struct{}{}
+	}
+
+	return func(expr ast.Expr) bool {
+		sel, ok := expr.(*ast.SelectorExpr)
+		if !ok {
+			return false
+		}
+
+		ident, ok := sel.X.(*ast.Ident)
+		if !ok || ident.Name != pkg {
+			return false
+		}
+
+		_, ok = set[sel.Sel.Name]
+
+		return ok
+	}
+}
+
+func matchesAny(expr ast.Expr, matchers []FlagTypeMatcher) bool {
+	for _, m := range matchers {
+		if m == nil {
+			continue
+		}
+
+		if m(expr) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func normalizeFlagName(name string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(name, "-", "_"), ".", "_")
 }
 
 func flagName(cl *ast.CompositeLit) string {
@@ -105,9 +277,10 @@ func flagName(cl *ast.CompositeLit) string {
 	return ""
 }
 
-// leadingComment returns the comment group immediately above node, or nil if
-// there is a blank line between them. *ast.CompositeLit has no Doc field, so
-// a position-based lookup against file.Comments is required.
+// leadingComment returns the comment group immediately above node, or
+// nil if a blank line separates them. *ast.CompositeLit has no Doc field
+// on the AST, so a position-based lookup against file.Comments is
+// required.
 func leadingComment(fset *token.FileSet, file *ast.File, node ast.Node) *ast.CommentGroup {
 	target := node.Pos()
 
@@ -137,21 +310,22 @@ func leadingComment(fset *token.FileSet, file *ast.File, node ast.Node) *ast.Com
 	return leading
 }
 
-// commentText turns an *ast.CommentGroup into a normalized description.
-// Line comments are joined with spaces within a paragraph; paragraphs
-// (separated by an empty // line in the source) are joined with "\n\n".
-func commentText(cg *ast.CommentGroup) string {
+// parseComment converts an *ast.CommentGroup into a structured
+// LongDescription. Paragraphs are split on empty // lines; within each
+// paragraph, source line breaks and the two-space indent used for
+// markdown list continuations are preserved verbatim. Only the
+// conventional "// " comment prefix is stripped.
+func parseComment(cg *ast.CommentGroup) *LongDescription {
 	if cg == nil {
-		return ""
+		return &LongDescription{}
 	}
 
-	var paragraphs []string
-
+	desc := &LongDescription{}
 	var current []string
 
 	flush := func() {
 		if len(current) > 0 {
-			paragraphs = append(paragraphs, strings.Join(current, " "))
+			desc.Paragraphs = append(desc.Paragraphs, current)
 			current = nil
 		}
 	}
@@ -159,7 +333,6 @@ func commentText(cg *ast.CommentGroup) string {
 	for _, c := range cg.List {
 		body := strings.TrimPrefix(c.Text, "//")
 		body = strings.TrimPrefix(body, " ")
-
 		body = strings.TrimRight(body, " \t")
 		if body == "" {
 			flush()
@@ -172,5 +345,5 @@ func commentText(cg *ast.CommentGroup) string {
 
 	flush()
 
-	return strings.Join(paragraphs, "\n\n")
+	return desc
 }

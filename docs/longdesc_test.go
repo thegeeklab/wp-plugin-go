@@ -135,7 +135,7 @@ func flags() []cli.Flag {
 				t.Fatal(err)
 			}
 
-			got, err := LongDescriptionsWith(path)
+			got, err := LongDescriptions(path)
 			if tt.wantErr {
 				assert.Error(t, err)
 				assert.Empty(t, got)
@@ -149,7 +149,7 @@ func flags() []cli.Flag {
 	}
 }
 
-func TestLongDescriptionsWithCustomMatcher(t *testing.T) {
+func TestLongDescriptionsCustomMatcher(t *testing.T) {
 	const src = `package flags
 
 import plugin_cli "github.com/thegeeklab/wp-plugin-go/v6/cli"
@@ -218,7 +218,7 @@ var core = &cli.StringFlag{
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := LongDescriptionsWith(path, tt.matchers...)
+			got, err := LongDescriptions(path, tt.matchers...)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
 		})

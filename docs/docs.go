@@ -89,7 +89,7 @@ func GetTemplateDataWithSource(app *cli.Command, sourcePath string) *CliTemplate
 		Description: prepareMultilineString(app.Description),
 		Usage:       prepareMultilineString(app.Usage),
 		UsageText:   prepareMultilineString(app.UsageText),
-		GlobalArgs:  prepareArgsWithValues(app.VisibleFlags(), LongDescriptionsForWith(sourcePath)),
+		GlobalArgs:  prepareArgsWithValues(app.VisibleFlags(), LongDescriptionsFor(sourcePath)),
 	}
 }
 

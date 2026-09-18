@@ -54,11 +54,11 @@ func (d *LongDescription) String() string {
 
 // FlagTypeMatcher reports whether an AST type expression refers to a
 // flag composite literal that the caller wants documented. See
-// DefaultFlagTypeMatcher for the built-in matcher and LongDescriptionsWith
+// DefaultFlagTypeMatcher for the built-in matcher and LongDescriptions
 // for usage.
 type FlagTypeMatcher func(ast.Expr) bool
 
-// LongDescriptionsWith parses sourcePath and extracts a LongDescription
+// LongDescriptions parses sourcePath and extracts a LongDescription
 // for every flag composite literal whose type matches at least one of
 // the supplied matchers (OR semantics; evaluation short-circuits at the
 // first match). When matchers is empty, only DefaultFlagTypeMatcher is
@@ -71,12 +71,12 @@ type FlagTypeMatcher func(ast.Expr) bool
 // A typical call site that wants both urfave core flags and wp-plugin-go
 // custom flag types:
 //
-//	docs.LongDescriptionsWith(
+//	docs.LongDescriptions(
 //	    "plugin/plugin.go",
 //	    docs.DefaultFlagTypeMatcher,
 //	    docs.SelectorMatcher("plugin_cli", "StringMapFlag", "DeepStringMapFlag"),
 //	)
-func LongDescriptionsWith(sourcePath string, matchers ...FlagTypeMatcher) (map[string]*LongDescription, error) {
+func LongDescriptions(sourcePath string, matchers ...FlagTypeMatcher) (map[string]*LongDescription, error) {
 	out := make(map[string]*LongDescription)
 
 	if len(matchers) == 0 {
@@ -123,17 +123,17 @@ func LongDescriptionsWith(sourcePath string, matchers ...FlagTypeMatcher) (map[s
 	return out, nil
 }
 
-// LongDescriptionsForWith is the matcher-aware template-data convenience
-// wrapper around LongDescriptionsWith. It normalises flag names so
-// "upload.metadata" matches the env-derived "upload_metadata", and
-// returns an empty map (instead of an error) when sourcePath is empty or
-// unparseable, so a missing source never breaks a docs pipeline.
-func LongDescriptionsForWith(sourcePath string, matchers ...FlagTypeMatcher) map[string]*LongDescription {
+// LongDescriptionsFor is the template-data convenience wrapper around
+// LongDescriptions. It normalises flag names so "upload.metadata" matches
+// the env-derived "upload_metadata", and returns an empty map (instead of
+// an error) when sourcePath is empty or unparseable, so a missing source
+// never breaks a docs pipeline.
+func LongDescriptionsFor(sourcePath string, matchers ...FlagTypeMatcher) map[string]*LongDescription {
 	if sourcePath == "" {
 		return map[string]*LongDescription{}
 	}
 
-	descs, err := LongDescriptionsWith(sourcePath, matchers...)
+	descs, err := LongDescriptions(sourcePath, matchers...)
 	if err != nil {
 		return map[string]*LongDescription{}
 	}
@@ -146,48 +146,9 @@ func LongDescriptionsForWith(sourcePath string, matchers ...FlagTypeMatcher) map
 	return normalized
 }
 
-// LongDescriptions is the v6.4.0-compatible flat-string adapter around
-// LongDescriptionsWith. It returns descriptions serialised via Flat() —
-// the same canonical string form documented on LongDescription.Flat.
-//
-// Retained to avoid breaking the v6.x API. New callers should prefer
-// LongDescriptionsWith, which exposes the structured form and lets
-// callers choose their own formatter.
-func LongDescriptions(sourcePath string) (map[string]string, error) {
-	descs, err := LongDescriptionsWith(sourcePath)
-	if err != nil {
-		return nil, err
-	}
-
-	out := make(map[string]string, len(descs))
-	for name, d := range descs {
-		out[name] = d.Flat()
-	}
-
-	return out, nil
-}
-
-// LongDescriptionsFor is the v6.4.0-compatible flat-string adapter
-// around LongDescriptionsForWith. It mirrors the normalisation behaviour
-// of LongDescriptionsForWith (so "upload.metadata" matches
-// "upload_metadata") and returns descriptions serialised via Flat().
-//
-// Retained to avoid breaking the v6.x API. New callers should prefer
-// LongDescriptionsForWith.
-func LongDescriptionsFor(sourcePath string) map[string]string {
-	descs := LongDescriptionsForWith(sourcePath)
-
-	out := make(map[string]string, len(descs))
-	for name, d := range descs {
-		out[name] = d.Flat()
-	}
-
-	return out
-}
-
 // DefaultFlagTypeMatcher matches the urfave/cli/v3 core flag composite
 // literals: BoolFlag, StringFlag, IntFlag and StringSliceFlag. Custom
-// flag types are intentionally not matched here — see LongDescriptionsWith
+// flag types are intentionally not matched here — see LongDescriptions
 // for the extension mechanism.
 func DefaultFlagTypeMatcher(expr ast.Expr) bool {
 	sel, ok := expr.(*ast.SelectorExpr)
@@ -321,6 +282,7 @@ func parseComment(cg *ast.CommentGroup) *LongDescription {
 	}
 
 	desc := &LongDescription{}
+
 	var current []string
 
 	flush := func() {
@@ -334,6 +296,7 @@ func parseComment(cg *ast.CommentGroup) *LongDescription {
 		body := strings.TrimPrefix(c.Text, "//")
 		body = strings.TrimPrefix(body, " ")
 		body = strings.TrimRight(body, " \t")
+
 		if body == "" {
 			flush()
 

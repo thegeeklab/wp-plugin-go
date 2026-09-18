@@ -176,8 +176,8 @@ func TestGetTemplateDataWithSource(t *testing.T) {
 	}
 }
 
-func TestLongDescriptionsForWith(t *testing.T) {
-	got := LongDescriptionsForWith("testdata/flags.go")
+func TestLongDescriptionsFor(t *testing.T) {
+	got := LongDescriptionsFor("testdata/flags.go")
 
 	want := map[string]*LongDescription{
 		"dummy_flag": {Paragraphs: [][]string{

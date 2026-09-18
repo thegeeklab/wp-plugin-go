@@ -171,6 +171,57 @@ func LongDescriptionMarkdown(d *LongDescription) string {
 	return strings.Join(parts, "\n\n")
 }
 
+// LongDescriptionFallback derives a LongDescription from a PluginArg when no
+// extracted long description is available. Implementations should return nil
+// when no usable description can be derived so callers can distinguish
+// "render this fallback" from "nothing to render".
+type LongDescriptionFallback func(*PluginArg) *LongDescription
+
+// ShortDescriptionFallback returns a LongDescription synthesised from
+// arg.Description as a single sentence-formatted paragraph. It is the
+// canonical fallback for renderers whose schema exposes only a single
+// description channel (e.g. a YAML "description:" block) and need to keep
+// flags defined in the plugin library visible in the output. Returns nil
+// when Description is empty.
+func ShortDescriptionFallback(arg *PluginArg) *LongDescription {
+	if arg.Description == "" {
+		return nil
+	}
+
+	return &LongDescription{
+		Paragraphs: [][]string{{plugin_template.ToSentence(arg.Description)}},
+	}
+}
+
+// LongDescriptionFunc returns a template function that resolves a
+// PluginArg's long description by first consulting descs and then invoking
+// fb when no extracted description is available. Pass nil for fb to disable
+// the fallback and have missing entries return nil directly.
+//
+// Typical usage from a renderer:
+//
+//	funcs["longDesc"] = docs.LongDescriptionFunc(descs, docs.ShortDescriptionFallback)
+//
+// Or, when no fallback is wanted:
+//
+//	funcs["longDesc"] = docs.LongDescriptionFunc(descs, nil)
+func LongDescriptionFunc(
+	descs map[string]*LongDescription,
+	fb LongDescriptionFallback,
+) func(*PluginArg) *LongDescription {
+	return func(arg *PluginArg) *LongDescription {
+		if d, ok := descs[arg.Name]; ok && !d.IsZero() {
+			return d
+		}
+
+		if fb == nil {
+			return nil
+		}
+
+		return fb(arg)
+	}
+}
+
 // LongDescriptionYAMLBlock renders a structured LongDescription as the
 // body of a YAML literal block scalar. Every source line is prefixed
 // with indent; paragraphs are separated by a blank line so the visual

@@ -193,6 +193,94 @@ func TestLongDescriptionsFor(t *testing.T) {
 	assert.Equal(t, want, got)
 }
 
+func TestLongDescriptionFunc(t *testing.T) {
+	extracted := &LongDescription{Paragraphs: [][]string{{"extracted long desc"}}}
+	fallback := func(arg *PluginArg) *LongDescription {
+		return &LongDescription{Paragraphs: [][]string{{"fallback for " + arg.Name}}}
+	}
+
+	tests := []struct {
+		name string
+		descs map[string]*LongDescription
+		fb   LongDescriptionFallback
+		arg  *PluginArg
+		want *LongDescription
+	}{
+		{
+			name: "extracted wins over fallback",
+			descs: map[string]*LongDescription{"foo": extracted},
+			fb:   fallback,
+			arg:  &PluginArg{Name: "foo", Description: "short"},
+			want: extracted,
+		},
+		{
+			name: "zero extracted triggers fallback",
+			descs: map[string]*LongDescription{"foo": {}},
+			fb:   fallback,
+			arg:  &PluginArg{Name: "foo"},
+			want: &LongDescription{Paragraphs: [][]string{{"fallback for foo"}}},
+		},
+		{
+			name: "missing entry triggers fallback",
+			descs: map[string]*LongDescription{},
+			fb:   fallback,
+			arg:  &PluginArg{Name: "foo"},
+			want: &LongDescription{Paragraphs: [][]string{{"fallback for foo"}}},
+		},
+		{
+			name: "fallback returning nil propagates nil",
+			descs: map[string]*LongDescription{},
+			fb:   func(*PluginArg) *LongDescription { return nil },
+			arg:  &PluginArg{Name: "foo"},
+			want: nil,
+		},
+		{
+			name: "missing entry and no fallback returns nil",
+			descs: map[string]*LongDescription{},
+			fb:   nil,
+			arg:  &PluginArg{Name: "foo"},
+			want: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := LongDescriptionFunc(tt.descs, tt.fb)(tt.arg)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestShortDescriptionFallback(t *testing.T) {
+	tests := []struct {
+		name string
+		arg  *PluginArg
+		want *LongDescription
+	}{
+		{
+			name: "synthesizes sentence-formatted paragraph",
+			arg:  &PluginArg{Name: "foo", Description: "short desc"},
+			want: &LongDescription{Paragraphs: [][]string{{"Short desc."}}},
+		},
+		{
+			name: "leaves already-sentence text untouched",
+			arg:  &PluginArg{Name: "foo", Description: "Already a sentence."},
+			want: &LongDescription{Paragraphs: [][]string{{"Already a sentence."}}},
+		},
+		{
+			name: "empty description returns nil",
+			arg:  &PluginArg{Name: "foo"},
+			want: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, ShortDescriptionFallback(tt.arg))
+		})
+	}
+}
+
 func TestBoolFlagDefault(t *testing.T) {
 	app := &cli.Command{
 		Name: "test",

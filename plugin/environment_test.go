@@ -151,9 +151,9 @@ func TestEnvironmentFromContext(t *testing.T) {
 			},
 		},
 		{
-			name: "missing environment flag",
-			bare: true,
-			want: Environment{},
+			name:    "missing environment flag",
+			bare:    true,
+			wantErr: assert.AnError,
 		},
 	}
 
@@ -161,8 +161,8 @@ func TestEnvironmentFromContext(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.bare {
 				got, err := EnvironmentFromContext(&cli.Command{})
-				assert.NoError(t, err)
-				assert.Empty(t, got)
+				assert.Error(t, err)
+				assert.Nil(t, got)
 
 				return
 			}

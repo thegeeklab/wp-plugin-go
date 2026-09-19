@@ -51,7 +51,7 @@ func EnvironmentFlags(category string) []cli.Flag {
 func EnvironmentFromContext(cmd *cli.Command) (Environment, error) {
 	val := cmd.Value("environment")
 	if val == nil {
-		return Environment{}, nil
+		return nil, fmt.Errorf("%w: environment flag not registered", ErrTypeAssertionFailed)
 	}
 
 	env, ok := val.(map[string]string)

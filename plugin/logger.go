@@ -41,7 +41,9 @@ func SetupConsoleLogger(ctx context.Context, cmd *cli.Command) (context.Context,
 	level := "info"
 
 	if cmd != nil {
-		level = cmd.String("log-level")
+		if l := cmd.String("log-level"); l != "" {
+			level = l
+		}
 	}
 
 	lvl, err := zerolog.ParseLevel(level)

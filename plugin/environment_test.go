@@ -140,7 +140,7 @@ func TestEnvironmentFromContext(t *testing.T) {
 		env     string
 		bare    bool
 		want    Environment
-		wantErr error
+		wantErr bool
 	}{
 		{
 			name: "environment map from context",
@@ -149,11 +149,13 @@ func TestEnvironmentFromContext(t *testing.T) {
 				"KEY1": "value1",
 				"KEY2": "value2",
 			},
+			wantErr: false,
 		},
 		{
-			name:    "missing environment flag",
+			name:    "missing environment flag returns error",
 			bare:    true,
-			wantErr: assert.AnError,
+			want:    nil,
+			wantErr: true,
 		},
 	}
 
@@ -169,6 +171,7 @@ func TestEnvironmentFromContext(t *testing.T) {
 
 			plugin := New(Options{
 				Name:    "dummy",
+				Flags:   EnvironmentFlags(FlagsPluginCategory),
 				Execute: func(_ context.Context) error { return nil },
 			})
 

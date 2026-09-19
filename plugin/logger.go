@@ -23,7 +23,8 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func loggingFlags(category string) []cli.Flag {
+// LoggingFlags returns the logging-related flags.
+func LoggingFlags(category string) []cli.Flag {
 	return []cli.Flag{
 		&cli.StringFlag{
 			Name:     "log-level",
@@ -40,7 +41,9 @@ func SetupConsoleLogger(ctx context.Context, cmd *cli.Command) (context.Context,
 	level := "info"
 
 	if cmd != nil {
-		level = cmd.String("log-level")
+		if l := cmd.String("log-level"); l != "" {
+			level = l
+		}
 	}
 
 	lvl, err := zerolog.ParseLevel(level)

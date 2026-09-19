@@ -62,16 +62,19 @@ func Test_currFromContext(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := New(options)
 			got.App.Action = func(_ context.Context, cmd *cli.Command) error {
-				got.Metadata = MetadataFromContext(cmd)
+				metadata := MetadataFromContext(cmd)
+				got.metadata = &metadata
 
 				return nil
 			}
 
 			_ = got.App.Run(t.Context(), []string{"dummy"})
 
-			assert.Equal(t, got.Metadata.Curr.Message, tt.want["message"])
-			assert.Equal(t, got.Metadata.Curr.Title, tt.want["title"])
-			assert.Equal(t, got.Metadata.Curr.Description, tt.want["desc"])
+			metadata, err := got.GetMetadata()
+			assert.NoError(t, err)
+			assert.Equal(t, metadata.Curr.Message, tt.want["message"])
+			assert.Equal(t, metadata.Curr.Title, tt.want["title"])
+			assert.Equal(t, metadata.Curr.Description, tt.want["desc"])
 		})
 	}
 }

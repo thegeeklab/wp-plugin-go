@@ -52,7 +52,8 @@ type Network struct {
 	Client *http.Client
 }
 
-func networkFlags(category string) []cli.Flag {
+// NetworkFlags returns the network-related flags.
+func NetworkFlags(category string) []cli.Flag {
 	return []cli.Flag{
 		&cli.BoolFlag{
 			Name:     "transport.insecure-skip-verify",

@@ -27,22 +27,19 @@ const (
 	FlagsPluginCategory     = "Plugin Flags"
 )
 
-// Flags has the cli.Flags for the Woodpecker plugin.
+// Flags returns the Woodpecker CI metadata flags.
+// These flags are always registered automatically by the plugin.
+// Plugin-specific flags (Logging, Network, Environment) must be explicitly
+// added by the user via Options.Flags.
 func Flags() []cli.Flag {
 	flags := make([]cli.Flag, 0)
 
-	// Pipeline flags
 	flags = append(flags, repositoryFlags(FlagsRepositoryCategory)...)
 	flags = append(flags, pipelineFlags(FlagsPipelineCategory)...)
 	flags = append(flags, currFlags(FlagsCommitCategory)...)
 	flags = append(flags, prevFlags(FlagsCommitCategory)...)
 	flags = append(flags, stepFlags(FlagsStepCategory)...)
 	flags = append(flags, systemFlags(FlagsSystemCategory)...)
-
-	// Plugin flags
-	flags = append(flags, loggingFlags(FlagsPluginCategory)...)
-	flags = append(flags, networkFlags(FlagsPluginCategory)...)
-	flags = append(flags, environmentFlags(FlagsPluginCategory)...)
 
 	return flags
 }

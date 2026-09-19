@@ -200,46 +200,46 @@ func TestLongDescriptionFunc(t *testing.T) {
 	}
 
 	tests := []struct {
-		name string
+		name  string
 		descs map[string]*LongDescription
-		fb   LongDescriptionFallback
-		arg  *PluginArg
-		want *LongDescription
+		fb    LongDescriptionFallback
+		arg   *PluginArg
+		want  *LongDescription
 	}{
 		{
-			name: "extracted wins over fallback",
+			name:  "extracted wins over fallback",
 			descs: map[string]*LongDescription{"foo": extracted},
-			fb:   fallback,
-			arg:  &PluginArg{Name: "foo", Description: "short"},
-			want: extracted,
+			fb:    fallback,
+			arg:   &PluginArg{Name: "foo", Description: "short"},
+			want:  extracted,
 		},
 		{
-			name: "zero extracted triggers fallback",
+			name:  "zero extracted triggers fallback",
 			descs: map[string]*LongDescription{"foo": {}},
-			fb:   fallback,
-			arg:  &PluginArg{Name: "foo"},
-			want: &LongDescription{Paragraphs: [][]string{{"fallback for foo"}}},
+			fb:    fallback,
+			arg:   &PluginArg{Name: "foo"},
+			want:  &LongDescription{Paragraphs: [][]string{{"fallback for foo"}}},
 		},
 		{
-			name: "missing entry triggers fallback",
+			name:  "missing entry triggers fallback",
 			descs: map[string]*LongDescription{},
-			fb:   fallback,
-			arg:  &PluginArg{Name: "foo"},
-			want: &LongDescription{Paragraphs: [][]string{{"fallback for foo"}}},
+			fb:    fallback,
+			arg:   &PluginArg{Name: "foo"},
+			want:  &LongDescription{Paragraphs: [][]string{{"fallback for foo"}}},
 		},
 		{
-			name: "fallback returning nil propagates nil",
+			name:  "fallback returning nil propagates nil",
 			descs: map[string]*LongDescription{},
-			fb:   func(*PluginArg) *LongDescription { return nil },
-			arg:  &PluginArg{Name: "foo"},
-			want: nil,
+			fb:    func(*PluginArg) *LongDescription { return nil },
+			arg:   &PluginArg{Name: "foo"},
+			want:  nil,
 		},
 		{
-			name: "missing entry and no fallback returns nil",
+			name:  "missing entry and no fallback returns nil",
 			descs: map[string]*LongDescription{},
-			fb:   nil,
-			arg:  &PluginArg{Name: "foo"},
-			want: nil,
+			fb:    nil,
+			arg:   &PluginArg{Name: "foo"},
+			want:  nil,
 		},
 	}
 

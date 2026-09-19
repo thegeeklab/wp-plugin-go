@@ -87,16 +87,20 @@ func TestPluginAction(t *testing.T) {
 
 			assert.NoError(t, err)
 
+			network, err := plugin.GetNetwork()
 			if tt.wantNetworkClient {
-				assert.NotNil(t, plugin.Network.Client)
+				assert.NoError(t, err)
+				assert.NotNil(t, network.Client)
 			} else {
-				assert.Nil(t, plugin.Network.Client)
+				assert.Error(t, err)
 			}
 
+			environment, err := plugin.GetEnvironment()
 			if tt.wantEnvironmentNil {
-				assert.Nil(t, plugin.Environment)
+				assert.Error(t, err)
 			} else {
-				assert.NotNil(t, plugin.Environment)
+				assert.NoError(t, err)
+				assert.NotNil(t, environment)
 			}
 		})
 	}

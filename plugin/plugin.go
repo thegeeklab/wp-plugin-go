@@ -16,6 +16,7 @@ package plugin
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -78,13 +79,47 @@ type Options struct {
 
 // Plugin defines the plugin instance.
 type Plugin struct {
-	App     *cli.Command
-	execute ExecuteFunc
-	// Network options.
-	Network Network
-	// Metadata of the current pipeline.
-	Metadata    Metadata
-	Environment Environment
+	App         *cli.Command
+	execute     ExecuteFunc
+	network     *Network
+	metadata    *Metadata
+	environment Environment
+}
+
+var (
+	errMetadataNotAvailable      = errors.New("metadata not available")
+	errNetworkFlagsNotRegistered = errors.New("network flags not registered: add NetworkFlags to Options.Flags")
+	errEnvFlagsNotRegistered     = errors.New("environment flags not registered: add EnvironmentFlags to Options.Flags")
+)
+
+// GetMetadata returns the pipeline metadata.
+// Metadata is always available after the plugin action runs.
+func (p *Plugin) GetMetadata() (Metadata, error) {
+	if p.metadata == nil {
+		return Metadata{}, errMetadataNotAvailable
+	}
+
+	return *p.metadata, nil
+}
+
+// GetNetwork returns the network configuration.
+// Returns an error if NetworkFlags were not registered via Options.Flags.
+func (p *Plugin) GetNetwork() (Network, error) {
+	if p.network == nil {
+		return Network{}, errNetworkFlagsNotRegistered
+	}
+
+	return *p.network, nil
+}
+
+// GetEnvironment returns the environment variables.
+// Returns an error if EnvironmentFlags were not registered via Options.Flags.
+func (p *Plugin) GetEnvironment() (Environment, error) {
+	if p.environment == nil {
+		return nil, errEnvFlagsNotRegistered
+	}
+
+	return p.environment, nil
 }
 
 // ExecuteFunc defines the function that is executed by the plugin.
@@ -127,29 +162,31 @@ func New(opt Options) *Plugin {
 func (p *Plugin) action(ctx context.Context, cmd *cli.Command) error {
 	var err error
 
-	p.Metadata = MetadataFromContext(cmd)
+	metadata := MetadataFromContext(cmd)
+	p.metadata = &metadata
 
 	if cmd.Value("transport.insecure-skip-verify") != nil {
-		p.Network = NetworkFromContext(cmd)
+		network := NetworkFromContext(cmd)
+		p.network = &network
 	}
 
 	if cmd.Value("environment") != nil {
-		p.Environment, err = EnvironmentFromContext(cmd)
+		p.environment, err = EnvironmentFromContext(cmd)
 		if err != nil {
 			return err
 		}
 	}
 
-	if p.Metadata.Pipeline.URL == "" {
+	if p.metadata.Pipeline.URL == "" {
 		url, err := url.JoinPath(
-			p.Metadata.System.URL,
+			p.metadata.System.URL,
 			"repos",
-			p.Metadata.Repository.Slug,
+			p.metadata.Repository.Slug,
 			"pipeline",
-			strconv.FormatInt(p.Metadata.Pipeline.Number, 10),
+			strconv.FormatInt(p.metadata.Pipeline.Number, 10),
 		)
 		if err == nil {
-			p.Metadata.Pipeline.URL = url
+			p.metadata.Pipeline.URL = url
 		}
 	}
 

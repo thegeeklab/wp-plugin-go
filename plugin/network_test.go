@@ -33,7 +33,11 @@ func TestNetworkFromContext(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			plugin := New(Options{
-				Name:    "dummy",
+				Name: "dummy",
+				Flags: append(
+					[]cli.Flag{},
+					NetworkFlags(FlagsPluginCategory)...,
+				),
 				Execute: func(_ context.Context) error { return nil },
 			})
 

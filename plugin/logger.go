@@ -23,7 +23,8 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func loggingFlags(category string) []cli.Flag {
+// LoggingFlags returns the logging-related flags.
+func LoggingFlags(category string) []cli.Flag {
 	return []cli.Flag{
 		&cli.StringFlag{
 			Name:     "log-level",

@@ -36,7 +36,8 @@ func (e Environment) Value() []string {
 	return values
 }
 
-func environmentFlags(category string) []cli.Flag {
+// EnvironmentFlags returns the environment-related flags.
+func EnvironmentFlags(category string) []cli.Flag {
 	return []cli.Flag{
 		&plugin_cli.StringMapFlag{
 			Name:     "environment",
@@ -48,7 +49,12 @@ func environmentFlags(category string) []cli.Flag {
 }
 
 func EnvironmentFromContext(cmd *cli.Command) (Environment, error) {
-	env, ok := cmd.Value("environment").(map[string]string)
+	val := cmd.Value("environment")
+	if val == nil {
+		return Environment{}, nil
+	}
+
+	env, ok := val.(map[string]string)
 	if !ok {
 		return nil, fmt.Errorf("%w: failed to read plugin environment", ErrTypeAssertionFailed)
 	}

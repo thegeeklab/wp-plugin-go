@@ -151,9 +151,9 @@ func TestEnvironmentFromContext(t *testing.T) {
 			},
 		},
 		{
-			name:    "missing environment flag",
-			bare:    true,
-			wantErr: assert.AnError,
+			name: "missing environment flag",
+			bare: true,
+			want: Environment{},
 		},
 	}
 
@@ -161,14 +161,18 @@ func TestEnvironmentFromContext(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.bare {
 				got, err := EnvironmentFromContext(&cli.Command{})
-				assert.Error(t, err)
-				assert.Nil(t, got)
+				assert.NoError(t, err)
+				assert.Empty(t, got)
 
 				return
 			}
 
 			plugin := New(Options{
-				Name:    "dummy",
+				Name: "dummy",
+				Flags: append(
+					[]cli.Flag{},
+					EnvironmentFlags(FlagsPluginCategory)...,
+				),
 				Execute: func(_ context.Context) error { return nil },
 			})
 

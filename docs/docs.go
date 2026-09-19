@@ -118,12 +118,22 @@ func parseFlags(flags []cli.Flag, longDescriptions map[string]*LongDescription) 
 
 		modArg := &PluginArg{}
 
-		name := strings.ToLower(strings.TrimSpace(flag.GetEnvVars()[0]))
-		if !strings.HasPrefix(name, namePrefix) {
+		var argName string
+
+		for _, env := range flag.GetEnvVars() {
+			envLower := strings.ToLower(strings.TrimSpace(env))
+			if strings.HasPrefix(envLower, namePrefix) {
+				argName = strings.TrimPrefix(envLower, namePrefix)
+
+				break
+			}
+		}
+
+		if argName == "" {
 			continue
 		}
 
-		modArg.Name = strings.TrimPrefix(name, namePrefix)
+		modArg.Name = argName
 		modArg.Description = flag.GetUsage()
 		modArg.LongDescription = LongDescriptionMarkdown(longDescriptions[modArg.Name])
 

@@ -4,6 +4,9 @@ Test description.
 
 ## Parameters
 
+**_alternate_env_flag_**\
+&emsp;Alternate env flag.
+
 **_dummy_flag_** _required_\
 &emsp;Dummy flag desc.
 
@@ -13,6 +16,9 @@ Test description.
 
 **_dummy_flag_int_** _required_\
 &emsp;Dummy int flag desc.
+
+**_first_env_**\
+&emsp;Multi plugin flag.
 
 **_slice_flag_**\
 &emsp;Slice flag.

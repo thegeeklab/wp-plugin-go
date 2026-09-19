@@ -44,7 +44,17 @@ func testApp() *cli.Command {
 			&cli.StringFlag{
 				Name:    "hidden.flag",
 				Usage:   "hidden flag",
-				Sources: cli.EnvVars("HIDDEN_FLAG", "PLUGIN_HIDDEN_FLAG"),
+				Sources: cli.EnvVars("HIDDEN_FLAG"),
+			},
+			&cli.StringFlag{
+				Name:    "alternate-env.flag",
+				Usage:   "alternate env flag",
+				Sources: cli.EnvVars("ALTERNATE_ENV_FLAG", "PLUGIN_ALTERNATE_ENV_FLAG"),
+			},
+			&cli.StringFlag{
+				Name:    "multi-plugin.flag",
+				Usage:   "multi plugin flag",
+				Sources: cli.EnvVars("PLUGIN_FIRST_ENV", "PLUGIN_SECOND_ENV"),
 			},
 		},
 	}
@@ -129,6 +139,12 @@ func TestGetTemplateDataWithSource(t *testing.T) {
 				Description: "test description",
 				GlobalArgs: []*PluginArg{
 					{
+						Name:        "alternate_env_flag",
+						Description: "alternate env flag",
+						Type:        "string",
+						Required:    false,
+					},
+					{
 						Name:        "dummy_flag",
 						Description: "Dummy flag desc.",
 						LongDescription: "&emsp;Dummy flag long description spanning two source lines " +
@@ -141,6 +157,12 @@ func TestGetTemplateDataWithSource(t *testing.T) {
 						Description: "dummy int flag desc",
 						Type:        "integer",
 						Required:    true,
+					},
+					{
+						Name:        "first_env",
+						Description: "multi plugin flag",
+						Type:        "string",
+						Required:    false,
 					},
 					{
 						Name:        "slice_flag",

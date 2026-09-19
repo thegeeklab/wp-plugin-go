@@ -168,11 +168,8 @@ func TestEnvironmentFromContext(t *testing.T) {
 			}
 
 			plugin := New(Options{
-				Name: "dummy",
-				Flags: append(
-					[]cli.Flag{},
-					EnvironmentFlags(FlagsPluginCategory)...,
-				),
+				Name:    "dummy",
+				Flags:   EnvironmentFlags(FlagsPluginCategory),
 				Execute: func(_ context.Context) error { return nil },
 			})
 

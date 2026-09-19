@@ -27,18 +27,13 @@ func TestPluginAction(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			flags := LoggingFlags(FlagsPluginCategory)
+			flags = append(flags, NetworkFlags(FlagsPluginCategory)...)
+			flags = append(flags, EnvironmentFlags(FlagsPluginCategory)...)
+
 			plugin := New(Options{
-				Name: "dummy",
-				Flags: append(
-					[]cli.Flag{},
-					append(
-						LoggingFlags(FlagsPluginCategory),
-						append(
-							NetworkFlags(FlagsPluginCategory),
-							EnvironmentFlags(FlagsPluginCategory)...,
-						)...,
-					)...,
-				),
+				Name:    "dummy",
+				Flags:   flags,
 				Execute: tt.execute,
 			})
 
@@ -57,52 +52,62 @@ func TestPluginAction(t *testing.T) {
 }
 
 func TestPluginFlags(t *testing.T) {
-	t.Run("metadata flags are always registered", func(t *testing.T) {
-		plugin := New(Options{
-			Name:    "test",
-			Execute: func(_ context.Context) error { return nil },
-		})
-
-		var flagNames []string
-		for _, f := range plugin.App.Flags {
-			flagNames = append(flagNames, f.Names()[0])
-		}
-
-		// Metadata flags should be present
-		assert.Contains(t, flagNames, "repo.slug")
-		assert.Contains(t, flagNames, "pipeline.number")
-		assert.Contains(t, flagNames, "commit.sha")
-		assert.Contains(t, flagNames, "step.number")
-		assert.Contains(t, flagNames, "system.name")
-
-		// Plugin flags should NOT be present (opt-in)
-		assert.NotContains(t, flagNames, "log-level")
-		assert.NotContains(t, flagNames, "transport.insecure-skip-verify")
-		assert.NotContains(t, flagNames, "environment")
-	})
-
-	t.Run("plugin flags can be opted in", func(t *testing.T) {
-		plugin := New(Options{
-			Name: "test",
-			Flags: []cli.Flag{
+	tests := []struct {
+		name         string
+		flags        []cli.Flag
+		wantPresent  []string
+		wantAbsent   []string
+	}{
+		{
+			name:  "metadata flags are always registered",
+			flags: nil,
+			wantPresent: []string{
+				"repo.slug",
+				"pipeline.number",
+				"commit.sha",
+				"step.number",
+				"system.name",
+			},
+			wantAbsent: []string{
+				"log-level",
+				"transport.insecure-skip-verify",
+				"environment",
+			},
+		},
+		{
+			name: "plugin flags can be opted in",
+			flags: []cli.Flag{
 				&cli.StringFlag{
 					Name:    "my-flag",
 					Usage:   "my flag",
 					Sources: cli.EnvVars("PLUGIN_MY_FLAG"),
 				},
 			},
-			Execute: func(_ context.Context) error { return nil },
+			wantPresent: []string{"my-flag", "repo.slug"},
+			wantAbsent:  nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			plugin := New(Options{
+				Name:    "test",
+				Flags:   tt.flags,
+				Execute: func(_ context.Context) error { return nil },
+			})
+
+			var flagNames []string
+			for _, f := range plugin.App.Flags {
+				flagNames = append(flagNames, f.Names()[0])
+			}
+
+			for _, flag := range tt.wantPresent {
+				assert.Contains(t, flagNames, flag)
+			}
+
+			for _, flag := range tt.wantAbsent {
+				assert.NotContains(t, flagNames, flag)
+			}
 		})
-
-		var flagNames []string
-		for _, f := range plugin.App.Flags {
-			flagNames = append(flagNames, f.Names()[0])
-		}
-
-		// User flag should be present
-		assert.Contains(t, flagNames, "my-flag")
-
-		// Metadata flags should still be present
-		assert.Contains(t, flagNames, "repo.slug")
-	})
+	}
 }

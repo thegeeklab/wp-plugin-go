@@ -12,7 +12,7 @@ func TestDeepStringMapSet(t *testing.T) {
 		name    string
 		input   string
 		want    map[string]map[string]string
-		wantErr bool
+		wantErr error
 	}{
 		{
 			name:  "empty string",
@@ -83,7 +83,7 @@ func TestDeepStringMapSet(t *testing.T) {
 			name:    "not parseable input returns error",
 			input:   `not-json`,
 			want:    map[string]map[string]string{},
-			wantErr: true,
+			wantErr: assert.AnError,
 		},
 	}
 
@@ -97,7 +97,7 @@ func TestDeepStringMapSet(t *testing.T) {
 
 			err := d.Set(tt.input)
 
-			if tt.wantErr {
+			if tt.wantErr != nil {
 				assert.Error(t, err)
 
 				return

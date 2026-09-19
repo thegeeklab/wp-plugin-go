@@ -27,7 +27,7 @@ func flags() []cli.Flag {
 		name    string
 		body    string
 		want    map[string]*LongDescription
-		wantErr bool
+		wantErr error
 	}{
 		{
 			name: "single-line comments",
@@ -120,7 +120,7 @@ func flags() []cli.Flag {
 		},
 		{
 			name:    "missing file returns error",
-			wantErr: true,
+			wantErr: assert.AnError,
 		},
 	}
 
@@ -129,14 +129,14 @@ func flags() []cli.Flag {
 			dir := t.TempDir()
 			path := filepath.Join(dir, "flags.go")
 
-			if tt.wantErr {
+			if tt.wantErr != nil {
 				path = filepath.Join(dir, "does-not-exist.go")
 			} else if err := os.WriteFile(path, []byte(fmt.Sprintf(baseSrc, tt.body)), 0o600); err != nil {
 				t.Fatal(err)
 			}
 
 			got, err := LongDescriptions(path)
-			if tt.wantErr {
+			if tt.wantErr != nil {
 				assert.Error(t, err)
 				assert.Empty(t, got)
 

@@ -11,7 +11,7 @@ func TestPluginAction(t *testing.T) {
 	tests := []struct {
 		name    string
 		execute ExecuteFunc
-		wantErr bool
+		wantErr error
 	}{
 		{
 			name:    "execute runs successfully",
@@ -20,7 +20,7 @@ func TestPluginAction(t *testing.T) {
 		{
 			name:    "execute returns error",
 			execute: func(_ context.Context) error { return assert.AnError },
-			wantErr: true,
+			wantErr: assert.AnError,
 		},
 	}
 
@@ -32,7 +32,7 @@ func TestPluginAction(t *testing.T) {
 			})
 
 			err := plugin.App.Run(t.Context(), []string{"dummy"})
-			if tt.wantErr {
+			if tt.wantErr != nil {
 				assert.Error(t, err)
 
 				return

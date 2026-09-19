@@ -57,7 +57,7 @@ func testFileContent(t *testing.T, file string) string {
 
 	data, err := os.ReadFile(file)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	data = bytes.ReplaceAll(data, []byte("\r\n"), []byte("\n"))

@@ -18,7 +18,7 @@ func TestCmdRun(t *testing.T) {
 	tests := []struct {
 		name       string
 		cmd        *Cmd
-		wantErr    bool
+		wantErr    error
 		wantStdout string
 		wantStderr string
 		wantTrace  string
@@ -93,7 +93,7 @@ func TestCmdRun(t *testing.T) {
 					Path: "/invalid/path",
 				},
 			},
-			wantErr: true,
+			wantErr: assert.AnError,
 		},
 	}
 
@@ -107,7 +107,7 @@ func TestCmdRun(t *testing.T) {
 			tt.cmd.Stderr = stderrBuf
 
 			err := tt.cmd.Run()
-			if tt.wantErr {
+			if tt.wantErr != nil {
 				assert.Error(t, err)
 
 				return

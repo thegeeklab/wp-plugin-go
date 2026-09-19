@@ -140,7 +140,7 @@ func TestEnvironmentFromContext(t *testing.T) {
 		env     string
 		bare    bool
 		want    Environment
-		wantErr bool
+		wantErr error
 	}{
 		{
 			name: "environment map from context",
@@ -153,7 +153,7 @@ func TestEnvironmentFromContext(t *testing.T) {
 		{
 			name:    "missing environment flag",
 			bare:    true,
-			wantErr: true,
+			wantErr: assert.AnError,
 		},
 	}
 

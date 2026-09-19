@@ -61,7 +61,7 @@ func TestRender(t *testing.T) {
 		tmpl    string
 		payload any
 		want    string
-		wantErr bool
+		wantErr error
 	}{
 		{
 			name:    "inline template",
@@ -84,19 +84,19 @@ func TestRender(t *testing.T) {
 		{
 			name:    "missing file",
 			tmpl:    "file:///no/such/file.tpl",
-			wantErr: true,
+			wantErr: assert.AnError,
 		},
 		{
 			name:    "invalid template",
 			tmpl:    "{{.Name",
-			wantErr: true,
+			wantErr: assert.AnError,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := Render(context.Background(), http.Client{}, tt.tmpl, tt.payload)
-			if tt.wantErr {
+			if tt.wantErr != nil {
 				assert.Error(t, err)
 
 				return
@@ -154,7 +154,7 @@ func TestRenderHTTP(t *testing.T) {
 		tmpl    string
 		payload any
 		want    string
-		wantErr bool
+		wantErr error
 	}{
 		{
 			name:    "template from http",
@@ -166,14 +166,14 @@ func TestRenderHTTP(t *testing.T) {
 			name:    "unreachable host",
 			tmpl:    closedServer.URL,
 			payload: map[string]string{"Name": "World"},
-			wantErr: true,
+			wantErr: assert.AnError,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := Render(context.Background(), http.Client{}, tt.tmpl, tt.payload)
-			if tt.wantErr {
+			if tt.wantErr != nil {
 				assert.Error(t, err)
 
 				return

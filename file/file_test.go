@@ -16,38 +16,35 @@ func TestWriteTmpFile(t *testing.T) {
 		name     string
 		fileName string
 		content  string
-		wantErr  bool
+		wantErr  error
 	}{
 		{
 			name:     "write to temp file",
 			fileName: "test.txt",
 			content:  helloWorld,
-			wantErr:  false,
 		},
 		{
 			name:     "empty file name",
 			fileName: "",
 			content:  helloWorld,
-			wantErr:  false,
 		},
 		{
 			name:     "empty file content",
 			fileName: "test.txt",
 			content:  "",
-			wantErr:  false,
 		},
 		{
 			name:     "create temp file error",
 			fileName: filepath.Join(os.TempDir(), "non-existent", "test.txt"),
 			content:  helloWorld,
-			wantErr:  true,
+			wantErr:  assert.AnError,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tmpFile, err := WriteTmpFile(tt.fileName, tt.content)
-			if tt.wantErr {
+			if tt.wantErr != nil {
 				assert.Error(t, err)
 
 				return
@@ -74,7 +71,7 @@ func TestReadStringOrFile(t *testing.T) {
 		useTempDir  bool
 		want        string
 		wantIsFile  bool
-		wantErr     bool
+		wantErr     error
 	}{
 		{
 			name:  "plain string",
@@ -102,7 +99,7 @@ func TestReadStringOrFile(t *testing.T) {
 			useTempDir: true,
 			want:       "",
 			wantIsFile: true,
-			wantErr:    true,
+			wantErr:    assert.AnError,
 		},
 	}
 
@@ -122,7 +119,7 @@ func TestReadStringOrFile(t *testing.T) {
 			}
 
 			got, isFile, err := ReadStringOrFile(input)
-			if tt.wantErr {
+			if tt.wantErr != nil {
 				assert.Error(t, err)
 				assert.Equal(t, tt.want, got)
 				assert.Equal(t, tt.wantIsFile, isFile)
@@ -154,7 +151,7 @@ func TestExpandFileList(t *testing.T) {
 		name    string
 		files   []string
 		want    []string
-		wantErr bool
+		wantErr error
 	}{
 		{
 			name:  "empty list",
@@ -177,14 +174,14 @@ func TestExpandFileList(t *testing.T) {
 		{
 			name:    "invalid glob pattern",
 			files:   []string{"["},
-			wantErr: true,
+			wantErr: assert.AnError,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := ExpandFileList(tt.files)
-			if tt.wantErr {
+			if tt.wantErr != nil {
 				assert.Error(t, err)
 				assert.Nil(t, got)
 

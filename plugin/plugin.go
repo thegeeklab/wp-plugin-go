@@ -128,11 +128,16 @@ func (p *Plugin) action(ctx context.Context, cmd *cli.Command) error {
 	var err error
 
 	p.Metadata = MetadataFromContext(cmd)
-	p.Network = NetworkFromContext(cmd)
 
-	p.Environment, err = EnvironmentFromContext(cmd)
-	if err != nil {
-		return err
+	if cmd.Value("transport.insecure-skip-verify") != nil {
+		p.Network = NetworkFromContext(cmd)
+	}
+
+	if cmd.Value("environment") != nil {
+		p.Environment, err = EnvironmentFromContext(cmd)
+		if err != nil {
+			return err
+		}
 	}
 
 	if p.Metadata.Pipeline.URL == "" {

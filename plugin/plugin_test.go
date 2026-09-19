@@ -9,31 +9,72 @@ import (
 )
 
 func TestPluginAction(t *testing.T) {
+	allFlags := func() []cli.Flag {
+		flags := LoggingFlags(FlagsPluginCategory)
+		flags = append(flags, NetworkFlags(FlagsPluginCategory)...)
+		flags = append(flags, EnvironmentFlags(FlagsPluginCategory)...)
+
+		return flags
+	}
+
 	tests := []struct {
-		name    string
-		execute ExecuteFunc
-		wantErr error
+		name               string
+		flags              []cli.Flag
+		execute            ExecuteFunc
+		wantErr            error
+		wantNetworkClient  bool
+		wantEnvironmentNil bool
 	}{
 		{
-			name:    "execute runs successfully",
-			execute: func(_ context.Context) error { return nil },
+			name:               "execute runs successfully with all flags",
+			flags:              allFlags(),
+			execute:            func(_ context.Context) error { return nil },
+			wantNetworkClient:  true,
+			wantEnvironmentNil: false,
 		},
 		{
-			name:    "execute returns error",
-			execute: func(_ context.Context) error { return assert.AnError },
-			wantErr: assert.AnError,
+			name:               "execute returns error",
+			flags:              allFlags(),
+			execute:            func(_ context.Context) error { return assert.AnError },
+			wantErr:            assert.AnError,
+			wantNetworkClient:  true,
+			wantEnvironmentNil: false,
+		},
+		{
+			name:               "succeeds without any opt-in flags",
+			flags:              nil,
+			execute:            func(_ context.Context) error { return nil },
+			wantNetworkClient:  false,
+			wantEnvironmentNil: true,
+		},
+		{
+			name:               "succeeds with only logging flags",
+			flags:              LoggingFlags(FlagsPluginCategory),
+			execute:            func(_ context.Context) error { return nil },
+			wantNetworkClient:  false,
+			wantEnvironmentNil: true,
+		},
+		{
+			name:               "succeeds with only network flags",
+			flags:              NetworkFlags(FlagsPluginCategory),
+			execute:            func(_ context.Context) error { return nil },
+			wantNetworkClient:  true,
+			wantEnvironmentNil: true,
+		},
+		{
+			name:               "succeeds with only environment flags",
+			flags:              EnvironmentFlags(FlagsPluginCategory),
+			execute:            func(_ context.Context) error { return nil },
+			wantNetworkClient:  false,
+			wantEnvironmentNil: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			flags := LoggingFlags(FlagsPluginCategory)
-			flags = append(flags, NetworkFlags(FlagsPluginCategory)...)
-			flags = append(flags, EnvironmentFlags(FlagsPluginCategory)...)
-
 			plugin := New(Options{
 				Name:    "dummy",
-				Flags:   flags,
+				Flags:   tt.flags,
 				Execute: tt.execute,
 			})
 
@@ -45,18 +86,28 @@ func TestPluginAction(t *testing.T) {
 			}
 
 			assert.NoError(t, err)
-			assert.NotNil(t, plugin.Network.Client)
-			assert.NotNil(t, plugin.Environment)
+
+			if tt.wantNetworkClient {
+				assert.NotNil(t, plugin.Network.Client)
+			} else {
+				assert.Nil(t, plugin.Network.Client)
+			}
+
+			if tt.wantEnvironmentNil {
+				assert.Nil(t, plugin.Environment)
+			} else {
+				assert.NotNil(t, plugin.Environment)
+			}
 		})
 	}
 }
 
 func TestPluginFlags(t *testing.T) {
 	tests := []struct {
-		name         string
-		flags        []cli.Flag
-		wantPresent  []string
-		wantAbsent   []string
+		name        string
+		flags       []cli.Flag
+		wantPresent []string
+		wantAbsent  []string
 	}{
 		{
 			name:  "metadata flags are always registered",

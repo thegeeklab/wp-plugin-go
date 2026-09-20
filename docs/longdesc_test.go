@@ -152,7 +152,7 @@ func flags() []cli.Flag {
 func TestLongDescriptionsCustomMatcher(t *testing.T) {
 	const src = `package flags
 
-import plugin_cli "github.com/thegeeklab/wp-plugin-go/v6/cli"
+import plugin_cli "github.com/thegeeklab/wp-plugin-go/v7/cli"
 import "github.com/urfave/cli/v3"
 
 // Custom map flag explanation, with two paragraphs.

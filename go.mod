@@ -1,4 +1,4 @@
-module github.com/thegeeklab/wp-plugin-go/v6
+module github.com/thegeeklab/wp-plugin-go/v7
 
 go 1.27.1
 

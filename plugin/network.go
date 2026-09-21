@@ -55,6 +55,9 @@ type Network struct {
 // NetworkFlags returns the network-related flags.
 func NetworkFlags(category string) []cli.Flag {
 	return []cli.Flag{
+		// Skip SSL verification.
+		//
+		// Activating this option is insecure and should be avoided in most cases.
 		&cli.BoolFlag{
 			Name:     "transport.insecure-skip-verify",
 			Usage:    "skip SSL verification",

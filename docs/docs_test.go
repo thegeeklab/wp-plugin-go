@@ -322,3 +322,45 @@ func TestBoolFlagDefault(t *testing.T) {
 	assert.Equal(t, "false", got.GlobalArgs[0].Default)
 	assert.Equal(t, "bool", got.GlobalArgs[0].Type)
 }
+
+func TestSliceFlagDefault(t *testing.T) {
+	app := &cli.Command{
+		Name: "test",
+		Flags: []cli.Flag{
+			&cli.StringSliceFlag{
+				Name:    "slice-flag",
+				Usage:   "slice flag desc",
+				Sources: cli.EnvVars("PLUGIN_SLICE_FLAG"),
+				Value:   []string{"validate", "plan"},
+			},
+		},
+	}
+
+	got := GetTemplateData(app)
+
+	assert.Len(t, got.GlobalArgs, 1)
+	assert.Equal(t, "slice_flag", got.GlobalArgs[0].Name)
+	assert.Equal(t, `["validate", "plan"]`, got.GlobalArgs[0].Default)
+	assert.Equal(t, "list", got.GlobalArgs[0].Type)
+}
+
+func TestMapFlagDefault(t *testing.T) {
+	app := &cli.Command{
+		Name: "test",
+		Flags: []cli.Flag{
+			&cli.StringMapFlag{
+				Name:    "labels",
+				Usage:   "labels desc",
+				Sources: cli.EnvVars("PLUGIN_LABELS"),
+				Value:   map[string]string{"a": "foo, bar", "b": "x"},
+			},
+		},
+	}
+
+	got := GetTemplateData(app)
+
+	assert.Len(t, got.GlobalArgs, 1)
+	assert.Equal(t, "labels", got.GlobalArgs[0].Name)
+	assert.Equal(t, `{"a": "foo, bar", "b": "x"}`, got.GlobalArgs[0].Default)
+	assert.Equal(t, "dict", got.GlobalArgs[0].Type)
+}

@@ -32,7 +32,7 @@ func (d *LongDescription) IsZero() bool {
 }
 
 // Flat returns the description as a single string — the canonical
-// lossless serialisation. Lines inside a paragraph are joined with "\n"
+// lossless serialization. Lines inside a paragraph are joined with "\n"
 // and paragraphs are joined with "\n\n".
 func (d *LongDescription) Flat() string {
 	if d.IsZero() {
@@ -83,9 +83,9 @@ func LongDescriptions(sourcePath string, matchers ...FlagTypeMatcher) (map[strin
 		matchers = []FlagTypeMatcher{DefaultFlagTypeMatcher}
 	}
 
-	fset := token.NewFileSet()
+	fs := token.NewFileSet()
 
-	file, err := parser.ParseFile(fset, sourcePath, nil, parser.ParseComments)
+	file, err := parser.ParseFile(fs, sourcePath, nil, parser.ParseComments)
 	if err != nil {
 		return out, err
 	}
@@ -100,7 +100,7 @@ func LongDescriptions(sourcePath string, matchers ...FlagTypeMatcher) (map[strin
 			return true
 		}
 
-		cg := leadingComment(fset, file, cl)
+		cg := leadingComment(fs, file, cl)
 		if cg == nil {
 			return true
 		}
@@ -110,7 +110,7 @@ func LongDescriptions(sourcePath string, matchers ...FlagTypeMatcher) (map[strin
 			return true
 		}
 
-		name := flagName(cl)
+		name := flagArgName(cl)
 		if name == "" {
 			return true
 		}
@@ -124,26 +124,22 @@ func LongDescriptions(sourcePath string, matchers ...FlagTypeMatcher) (map[strin
 }
 
 // LongDescriptionsFor is the template-data convenience wrapper around
-// LongDescriptions. It normalises flag names so "upload.metadata" matches
-// the env-derived "upload_metadata", and returns an empty map (instead of
-// an error) when sourcePath is empty or unparseable, so a missing source
-// never breaks a docs pipeline.
+// LongDescriptions. Descriptions are keyed by the first plugin-prefixed
+// env var of each flag so they align with the arg names derived by
+// parseFlags. It returns an empty map (instead of an error) when
+// sourcePath is empty or unparsable, so a missing source never breaks a
+// docs pipeline.
 func LongDescriptionsFor(sourcePath string, matchers ...FlagTypeMatcher) map[string]*LongDescription {
 	if sourcePath == "" {
 		return map[string]*LongDescription{}
 	}
 
-	descs, err := LongDescriptions(sourcePath, matchers...)
+	descriptions, err := LongDescriptions(sourcePath, matchers...)
 	if err != nil {
 		return map[string]*LongDescription{}
 	}
 
-	normalized := make(map[string]*LongDescription, len(descs))
-	for name, d := range descs {
-		normalized[normalizeFlagName(name)] = d
-	}
-
-	return normalized
+	return descriptions
 }
 
 // DefaultFlagTypeMatcher matches the urfave/cli/v3 core flag composite
@@ -211,11 +207,11 @@ func matchesAny(expr ast.Expr, matchers []FlagTypeMatcher) bool {
 	return false
 }
 
-func normalizeFlagName(name string) string {
-	return strings.ReplaceAll(strings.ReplaceAll(name, "-", "_"), ".", "_")
-}
-
-func flagName(cl *ast.CompositeLit) string {
+// flagArgName returns the arg name a flag renders under, derived from its
+// first plugin-prefixed env var. This mirrors the arg name that parseFlags
+// derives from flag.GetEnvVars(), so long descriptions are keyed
+// consistently with the rendered CLI args regardless of the flag's Name.
+func flagArgName(cl *ast.CompositeLit) string {
 	for _, e := range cl.Elts {
 		kv, ok := e.(*ast.KeyValueExpr)
 		if !ok {
@@ -223,16 +219,53 @@ func flagName(cl *ast.CompositeLit) string {
 		}
 
 		key, ok := kv.Key.(*ast.Ident)
-		if !ok || key.Name != "Name" {
+		if !ok || key.Name != "Sources" {
 			continue
 		}
 
-		bl, ok := kv.Value.(*ast.BasicLit)
-		if !ok || bl.Kind != token.STRING {
-			continue
+		return envVarName(kv.Value)
+	}
+
+	return ""
+}
+
+// envVarName returns the first plugin-prefixed env var referenced by a
+// flag's Sources expression, lowercased with the "plugin_" prefix
+// stripped. Env vars are discovered in source order. Only the string
+// arguments of cli.EnvVar and cli.EnvVars calls are considered; other
+// string literals (e.g. cli.File paths) are ignored so the key matches
+// what parseFlags derives from flag.GetEnvVars().
+func envVarName(expr ast.Expr) string {
+	var envs []string
+
+	ast.Inspect(expr, func(n ast.Node) bool {
+		call, ok := n.(*ast.CallExpr)
+		if !ok {
+			return true
 		}
 
-		return strings.Trim(bl.Value, `"`)
+		sel, ok := call.Fun.(*ast.SelectorExpr)
+		if !ok || (sel.Sel.Name != "EnvVar" && sel.Sel.Name != "EnvVars") {
+			return true
+		}
+
+		for _, arg := range call.Args {
+			bl, ok := arg.(*ast.BasicLit)
+			if !ok || bl.Kind != token.STRING {
+				continue
+			}
+
+			envs = append(envs, strings.Trim(bl.Value, `"`))
+		}
+
+		return false
+	})
+
+	for _, env := range envs {
+		lower := strings.ToLower(env)
+		if strings.HasPrefix(lower, "plugin_") {
+			return strings.TrimPrefix(lower, "plugin_")
+		}
 	}
 
 	return ""
@@ -242,7 +275,7 @@ func flagName(cl *ast.CompositeLit) string {
 // nil if a blank line separates them. *ast.CompositeLit has no Doc field
 // on the AST, so a position-based lookup against file.Comments is
 // required.
-func leadingComment(fset *token.FileSet, file *ast.File, node ast.Node) *ast.CommentGroup {
+func leadingComment(fs *token.FileSet, file *ast.File, node ast.Node) *ast.CommentGroup {
 	target := node.Pos()
 
 	var leading *ast.CommentGroup
@@ -261,8 +294,8 @@ func leadingComment(fset *token.FileSet, file *ast.File, node ast.Node) *ast.Com
 		return nil
 	}
 
-	endLine := fset.Position(leading.End()).Line
-	startLine := fset.Position(node.Pos()).Line
+	endLine := fs.Position(leading.End()).Line
+	startLine := fs.Position(node.Pos()).Line
 
 	if startLine > endLine+1 {
 		return nil

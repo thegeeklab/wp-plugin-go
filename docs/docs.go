@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"text/template"
 
@@ -141,17 +142,17 @@ func parseFlags(flags []cli.Flag, longDescriptions map[string]*LongDescription) 
 			modArg.Required = rf.IsRequired()
 		}
 
+		modArg.Type = parseType(reflect.TypeOf(f).String())
+
 		if !modArg.Required && flag.IsDefaultVisible() {
 			if s := flag.GetDefaultText(); s != "" {
-				modArg.Default = s
+				modArg.Default = formatDefaultValue(modArg.Type, s)
 			} else if flag.TypeName() == "bool" {
 				modArg.Default = flag.GetValue()
 			} else if flag.TakesValue() && flag.GetValue() != "" {
-				modArg.Default = flag.GetValue()
+				modArg.Default = formatDefaultValue(modArg.Type, flag.GetValue())
 			}
 		}
-
-		modArg.Type = parseType(reflect.TypeOf(f).String())
 
 		args = append(args, modArg)
 	}
@@ -266,6 +267,42 @@ func LongDescriptionYAMLBlock(d *LongDescription, indent string) string {
 	}
 
 	return b.String()
+}
+
+// formatDefaultValue renders a flag default as a YAML-compatible value.
+// urfave/cli joins slice defaults into a quoted, comma-separated string
+// (e.g. `"validate", "plan"`), so list defaults are wrapped in brackets to
+// form a valid YAML list. Map defaults use a `key=value` layout and are
+// rewritten into a JSON object.
+func formatDefaultValue(typ, raw string) string {
+	switch typ {
+	case "list":
+		return "[" + raw + "]"
+	case "dict":
+		return formatMapDefault(raw)
+	default:
+		return raw
+	}
+}
+
+// formatMapDefault rewrites a urfave/cli map default into a JSON object.
+// Each entry is `key="value"` with a %q-quoted value, so a regex can
+// isolate entries while treating escaped quotes and ", " inside a value
+// as part of that value.
+func formatMapDefault(raw string) string {
+	re := regexp.MustCompile(`[^,=]+="(?:\\.|[^"\\])*"`)
+	pairs := make([]string, 0)
+
+	for _, part := range re.FindAllString(raw, -1) {
+		key, val, ok := strings.Cut(part, "=")
+		if !ok {
+			continue
+		}
+
+		pairs = append(pairs, strconv.Quote(strings.TrimSpace(key))+": "+val)
+	}
+
+	return "{" + strings.Join(pairs, ", ") + "}"
 }
 
 func parseType(raw string) string {

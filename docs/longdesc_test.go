@@ -119,6 +119,52 @@ func flags() []cli.Flag {
 			want: map[string]*LongDescription{},
 		},
 		{
+			name: "key derived from plugin env var, not flag name",
+			body: `// Env-derived key.
+		&cli.StringFlag{
+			Name:    "args",
+			Usage:   "args usage",
+			Sources: cli.EnvVars("PLUGIN_BUILD_ARGS"),
+		},`,
+			want: map[string]*LongDescription{
+				"build_args": {Paragraphs: [][]string{{"Env-derived key."}}},
+			},
+		},
+		{
+			name: "key derived from first plugin env var in value source chain",
+			body: `// Chain-derived key.
+		&cli.StringSliceFlag{
+			Name: "tags",
+			Sources: cli.ValueSourceChain{
+				Chain: []cli.ValueSource{
+					cli.EnvVar("PLUGIN_TAGS"),
+					cli.EnvVar("PLUGIN_TAG"),
+					cli.File(".tags"),
+				},
+			},
+		},`,
+			want: map[string]*LongDescription{
+				"tags": {Paragraphs: [][]string{{"Chain-derived key."}}},
+			},
+		},
+		{
+			name: "non-env string literal does not become the key",
+			body: `// Env key wins over file path.
+		&cli.StringFlag{
+			Name:    "state",
+			Usage:   "state usage",
+			Sources: cli.ValueSourceChain{
+				Chain: []cli.ValueSource{
+					cli.File("plugin_state.json"),
+					cli.EnvVar("PLUGIN_STATE"),
+				},
+			},
+		},`,
+			want: map[string]*LongDescription{
+				"state": {Paragraphs: [][]string{{"Env key wins over file path."}}},
+			},
+		},
+		{
 			name:    "missing file returns error",
 			wantErr: assert.AnError,
 		},

@@ -208,7 +208,7 @@ func matchesAny(expr ast.Expr, matchers []FlagTypeMatcher) bool {
 }
 
 // flagArgName returns the arg name a flag renders under, derived from its
-// first plugin-prefixed env var. This mirrors the identifier parseFlags
+// first plugin-prefixed env var. This mirrors the arg name that parseFlags
 // derives from flag.GetEnvVars(), so long descriptions are keyed
 // consistently with the rendered CLI args regardless of the flag's Name.
 func flagArgName(cl *ast.CompositeLit) string {

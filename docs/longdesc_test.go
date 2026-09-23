@@ -332,6 +332,91 @@ func makeSelector(pkg, name string) ast.Expr {
 	}
 }
 
+func TestDefaultFlagTypeMatcher(t *testing.T) {
+	tests := []struct {
+		name string
+		expr ast.Expr
+		want bool
+	}{
+		{
+			name: "non selector",
+			expr: &ast.Ident{Name: "Foo"},
+			want: false,
+		},
+		{
+			name: "custom package",
+			expr: makeSelector("plugin_cli", "StringMapFlag"),
+			want: false,
+		},
+		{
+			name: "bool",
+			expr: makeSelector("cli", "BoolFlag"),
+			want: true,
+		},
+		{
+			name: "string",
+			expr: makeSelector("cli", "StringFlag"),
+			want: true,
+		},
+		{
+			name: "int",
+			expr: makeSelector("cli", "IntFlag"),
+			want: true,
+		},
+		{
+			name: "int64",
+			expr: makeSelector("cli", "Int64Flag"),
+			want: true,
+		},
+		{
+			name: "uint",
+			expr: makeSelector("cli", "UintFlag"),
+			want: true,
+		},
+		{
+			name: "float64",
+			expr: makeSelector("cli", "Float64Flag"),
+			want: true,
+		},
+		{
+			name: "duration",
+			expr: makeSelector("cli", "DurationFlag"),
+			want: true,
+		},
+		{
+			name: "timestamp",
+			expr: makeSelector("cli", "TimestampFlag"),
+			want: true,
+		},
+		{
+			name: "string slice",
+			expr: makeSelector("cli", "StringSliceFlag"),
+			want: true,
+		},
+		{
+			name: "string map",
+			expr: makeSelector("cli", "StringMapFlag"),
+			want: true,
+		},
+		{
+			name: "int slice",
+			expr: makeSelector("cli", "IntSliceFlag"),
+			want: true,
+		},
+		{
+			name: "non flag type",
+			expr: makeSelector("cli", "StringConfig"),
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, DefaultFlagTypeMatcher(tt.expr))
+		})
+	}
+}
+
 func TestLongDescriptionFlat(t *testing.T) {
 	tests := []struct {
 		name string

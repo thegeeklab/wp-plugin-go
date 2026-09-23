@@ -142,10 +142,10 @@ func LongDescriptionsFor(sourcePath string, matchers ...FlagTypeMatcher) map[str
 	return descriptions
 }
 
-// DefaultFlagTypeMatcher matches the urfave/cli/v3 core flag composite
-// literals: BoolFlag, StringFlag, IntFlag and StringSliceFlag. Custom
-// flag types are intentionally not matched here — see LongDescriptions
-// for the extension mechanism.
+// DefaultFlagTypeMatcher matches all urfave/cli/v3 core flag composite
+// literals (any `cli.*Flag` type). Custom flag types such as the
+// wp-plugin-go map flags are intentionally not matched here — see
+// LongDescriptions for the extension mechanism.
 func DefaultFlagTypeMatcher(expr ast.Expr) bool {
 	sel, ok := expr.(*ast.SelectorExpr)
 	if !ok {
@@ -157,12 +157,7 @@ func DefaultFlagTypeMatcher(expr ast.Expr) bool {
 		return false
 	}
 
-	switch sel.Sel.Name {
-	case "BoolFlag", "StringFlag", "IntFlag", "StringSliceFlag":
-		return true
-	}
-
-	return false
+	return strings.HasSuffix(sel.Sel.Name, "Flag")
 }
 
 // SelectorMatcher returns a FlagTypeMatcher that matches selector

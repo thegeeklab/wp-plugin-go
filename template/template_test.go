@@ -56,6 +56,11 @@ func TestRender(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	hashFile := filepath.Join(dir, "hash.txt")
+	if err := os.WriteFile(hashFile, []byte("hello"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
 	tests := []struct {
 		name    string
 		tmpl    string
@@ -71,9 +76,15 @@ func TestRender(t *testing.T) {
 		},
 		{
 			name:    "template with function",
-			tmpl:    `{{.Word | ToSentence}}`,
+			tmpl:    `{{.Word | toSentence}}`,
 			payload: map[string]string{"Word": "hello"},
 			want:    "Hello.",
+		},
+		{
+			name:    "template with sha256file",
+			tmpl:    `{{ sha256file .Path }}`,
+			payload: map[string]string{"Path": hashFile},
+			want:    "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
 		},
 		{
 			name:    "template from file",

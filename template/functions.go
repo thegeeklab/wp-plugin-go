@@ -1,7 +1,11 @@
 package template
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"errors"
 	"fmt"
+	"os"
 	"text/template"
 	"unicode"
 	"unicode/utf8"
@@ -9,12 +13,15 @@ import (
 	"github.com/Masterminds/sprig/v3"
 )
 
+var errNoPaths = errors.New("sha256file: at least one path is required")
+
 // LoadFuncMap merges the sprig template functions with any custom functions
 // provided, giving priority to the custom functions in case of collisions.
 func LoadFuncMap() template.FuncMap {
 	sprigFuncs := sprig.GenericFuncMap()
 	customFuncs := template.FuncMap{
-		"ToSentence": ToSentence,
+		"toSentence": ToSentence,
+		"sha256file": Sha256File,
 	}
 
 	for name, f := range customFuncs {
@@ -55,4 +62,25 @@ func getLastRune(s string, c int) string {
 	}
 
 	return s[j:]
+}
+
+// Sha256File computes the SHA-256 hash of a file's contents.
+// It supports multiple file paths, hashing their contents in order.
+func Sha256File(paths ...string) (string, error) {
+	if len(paths) == 0 {
+		return "", errNoPaths
+	}
+
+	h := sha256.New()
+
+	for _, path := range paths {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return "", fmt.Errorf("failed to read %s: %w", path, err)
+		}
+
+		h.Write(data)
+	}
+
+	return hex.EncodeToString(h.Sum(nil)), nil
 }

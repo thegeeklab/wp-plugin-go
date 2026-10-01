@@ -10,7 +10,7 @@ import (
 	"strings"
 	"text/template"
 
-	plugin_template "github.com/thegeeklab/wp-plugin-go/v7/template"
+	plugin_template "github.com/thegeeklab/wp-plugin-go/v8/template"
 
 	"github.com/urfave/cli/v3"
 )

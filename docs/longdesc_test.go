@@ -177,7 +177,7 @@ func flags() []cli.Flag {
 
 			if tt.wantErr != nil {
 				path = filepath.Join(dir, "does-not-exist.go")
-			} else if err := os.WriteFile(path, []byte(fmt.Sprintf(baseSrc, tt.body)), 0o600); err != nil {
+			} else if err := os.WriteFile(path, fmt.Appendf(nil, baseSrc, tt.body), 0o600); err != nil {
 				t.Fatal(err)
 			}
 
@@ -198,7 +198,7 @@ func flags() []cli.Flag {
 func TestLongDescriptionsCustomMatcher(t *testing.T) {
 	const src = `package flags
 
-import plugin_cli "github.com/thegeeklab/wp-plugin-go/v7/cli"
+import plugin_cli "github.com/thegeeklab/wp-plugin-go/v8/cli"
 import "github.com/urfave/cli/v3"
 
 // Custom map flag explanation, with two paragraphs.

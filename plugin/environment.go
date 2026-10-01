@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	plugin_cli "github.com/thegeeklab/wp-plugin-go/v7/cli"
+	plugin_cli "github.com/thegeeklab/wp-plugin-go/v8/cli"
 	"github.com/urfave/cli/v3"
 )
 

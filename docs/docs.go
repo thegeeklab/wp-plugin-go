@@ -40,6 +40,11 @@ type CliTemplate struct {
 	GlobalArgs  []*PluginArg
 }
 
+const (
+	typeList = "list"
+	typeDict = "dict"
+)
+
 //go:embed templates
 var templateFs embed.FS
 
@@ -276,9 +281,9 @@ func LongDescriptionYAMLBlock(d *LongDescription, indent string) string {
 // rewritten into a JSON object.
 func formatDefaultValue(typ, raw string) string {
 	switch typ {
-	case "list":
+	case typeList:
 		return "[" + raw + "]"
-	case "dict":
+	case typeDict:
 		return formatMapDefault(raw)
 	default:
 		return raw
@@ -308,12 +313,12 @@ func formatMapDefault(raw string) string {
 func parseType(raw string) string {
 	// Check for slice types
 	if strings.Contains(raw, "SliceBase") {
-		return "list"
+		return typeList
 	}
 
 	// Check for map types
 	if strings.Contains(raw, "MapFlag") || strings.Contains(raw, "StringMapFlag") {
-		return "dict"
+		return typeDict
 	}
 
 	// Extract the type from the FlagBase generic parameters
@@ -325,12 +330,12 @@ func parseType(raw string) string {
 
 		// Handle array/slice types
 		if strings.HasPrefix(baseType, "[]") {
-			return "list"
+			return typeList
 		}
 
 		// Handle map types
 		if strings.HasPrefix(baseType, "map[") {
-			return "dict"
+			return typeDict
 		}
 
 		// Handle basic types
